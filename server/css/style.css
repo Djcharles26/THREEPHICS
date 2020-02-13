@@ -1,0 +1,5 @@
+/* I did this so that the canvas can fit the window */
+body, html {
+	height: 100vh;
+	margin:0;
+}
