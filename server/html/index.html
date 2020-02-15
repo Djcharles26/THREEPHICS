@@ -9,9 +9,19 @@
     
   </head>
   <body>
-    <button onclick="edges()">EDGES</button>
     
+    <button onclick="changeCamera(RIGHT)">RIGHT</button>
+    <button onclick="changeCamera(LEFT)">LEFT</button>
+    <button onclick="changeCamera(FRONT)">FRONT</button>
+    <button onclick="changeCamera(BACK)">BACK</button>
+    <button onclick="changeCamera(TOP)">TOP</button>
+    <button onclick="changeCamera(BOTTOM)">BOTTOM</button>
+    <button onclick="changeCamera(PERSPECTIVE)">PERSPECTIVE</button>
+    <button onclick="moveX(true)">+</button>
+    <button onclick="moveX(false)">-</button>
+    <button onclick="addObject("cube")">CUBE</button>
 
+    <script type="module" src="http://localhost:3000/static/constants.js"></script>
     <script type="module" src="http://localhost:3000/static/index.js"></script>
   </body>
 </html>

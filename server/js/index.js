@@ -1,83 +1,158 @@
-//'http://localhost:3000/static';
-
 import * as THREE from './build/three.module.js';
 import {OrbitControls} from './addons/jsm/controls/OrbitControls.js';
-import { getRenderer, onWindowResize, onMouseMove, mouse } from './utils.js';
-import { CURRENT_CAMERA, PLANE } from './constants.js';
+import { getRenderer, onWindowResize, onMouseMove, onKeyPress, onKeyRelease, onMousePress, mouse } from './utils.js';
+import {
+  PLANE,
+  PERSPECTIVE_CAMERA,
+  RIGHT_CAMERA,
+  TOP_CAMERA,
+  BOTTOM_CAMERA,
+  LEFT_CAMERA,
+  FRONT_CAMERA,
+  BACK_CAMERA,
+  RIGHT, 
+  FRONT,
+  TOP,
+  BOTTOM,
+  BACK, 
+  PERSPECTIVE
+} from './constants.js';
+
 import threeDGeometry from './objects/3DGeometry.js';
-import {VertexNormalsHelper} from './addons/jsm/helpers/VertexNormalsHelper.js';
+import List from './components/List.js';
+
+import camera from './cameras/camera.js';
+
+
 //variables
 
-var  controls, scene;
-var cubeObject;
+var scene;
 var raycaster = new THREE.Raycaster();
-export var  camera = [], renderer;
+var objectList = new List();
+export var renderer, controls;
 var INTERSECTED;
-
-
+export var CURRENT_CAMERA;
+var cube;
 
 init();
 function init(){
   renderer = getRenderer();
   //camera =>
-  camera[0] = new THREE.PerspectiveCamera( 35,  window.innerWidth / window.innerHeight , 0.1, 3000 );
-  //scene=>
+
+  CURRENT_CAMERA = PERSPECTIVE_CAMERA;
+  //scene =>
   scene = new THREE.Scene();
   //controls => 
   controls = new OrbitControls( camera[CURRENT_CAMERA], renderer.domElement );
+  controls.enableKeys = false;
+  controls.enabled = false;
   controls.mouseButtons = {
-    (LEFT && 13): 
-  }
-  console.log(controls);
+    LEFT: THREE.MOUSE.ROTATE,
+    RIGHT:THREE.MOUSE.DOLLY,
+    MIDDLE: THREE.MOUSE.PAN
+  };
+  //listeners =>
   window.addEventListener('resize', onWindowResize, false );
+  window.addEventListener('onwheel' , onMousePress, false);
+  window.addEventListener('keydown', onKeyPress, false );
+  window.addEventListener('keyup', onKeyRelease, false);
+  window.addEventListener("mousemove", onMouseMove, false);
+  
 
-  //lights => 
-  
-  const light = new THREE.AmbientLight(0xffffff, 0.5);
-  
-  scene.add(light);
-  
-  const light2 = new THREE.DirectionalLight(0xffffff, 0.5);
-  light2.position.set(1000,1000,500);
-  
-  //var helper = new THREE.DirectionalLightHelper(light2, 5);
-  scene.add(light2);
-  //scene.add(helper);
-
-
-  // world
-  
-  
-  cubeObject = new threeDGeometry("Cube", new THREE.BoxGeometry(10,10,10), null, true);
-  
 
   //world construction (Don't touch)
-  const planeObject = new threeDGeometry(PLANE, new THREE.PlaneGeometry(100,100,10, 10),
-   new THREE.MeshLambertMaterial({color:0xffff, wireframe:true}), false );
-  planeObject.rotateObject(90 * Math.PI / 180);
-  scene.add(planeObject.mesh);
+  const world = new THREE.Group();
+  //lights => 
   
-  cubeObject.addObjectToScene(scene);
   
-  camera[CURRENT_CAMERA].position.set(30,30,100);
+  const light = new THREE.AmbientLight(0xffffff, 0.5);
+  world.add(light);
+  const light2 = new THREE.DirectionalLight(0xffffff, 0.5);
+  light2.position.set(1000,1000,500);
+  world.add(light2);
+
+
+  //plane =>
+  var planeObject = new threeDGeometry(PLANE, new THREE.PlaneGeometry(100,100,10, 10),
+    new THREE.MeshLambertMaterial({color:0xffff, wireframe:true, transparent: true, opacity: 0.2}), false 
+  );
+  planeObject.vertex.visible = true;
+  planeObject.rotateObject(270 * Math.PI / 180);
+ 
+  //elements
   
-  requestAnimationFrame(render);
+  world.add(planeObject.mesh);
+  
+
+  scene.add(world);
+
+}
+const update = () =>{
+  controls = new OrbitControls( camera[CURRENT_CAMERA], renderer.domElement );
+  console.log(controls);
+  controls.target = new THREE.Vector3(0,0,0);
+  controls.enableKeys = false;
+  controls.enabled = false;
+  if(CURRENT_CAMERA === PERSPECTIVE_CAMERA)
+  {
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      RIGHT:THREE.MOUSE.DOLLY,
+      MIDDLE: THREE.MOUSE.PAN
+    };
+  }else{
+    controls.mouseButtons = {
+      RIGHT:THREE.MOUSE.DOLLY,
+
+    };
+  } 
+
+}
+
+
+window.changeCamera = (point)=>{
+  console.log("CAMERA")
+  switch(point){
+    case TOP:
+      CURRENT_CAMERA = TOP_CAMERA;
+    break;
+    case BOTTOM:
+      CURRENT_CAMERA = BOTTOM_CAMERA;
+    break;
+    case LEFT:
+      CURRENT_CAMERA = LEFT_CAMERA;
+    break;
+    case RIGHT:
+      CURRENT_CAMERA = RIGHT_CAMERA;
+    break;
+    case FRONT:
+      CURRENT_CAMERA = FRONT_CAMERA;
+    break;
+    case BACK:
+      CURRENT_CAMERA = BACK_CAMERA;
+    break;
+    case PERSPECTIVE:
+      CURRENT_CAMERA = PERSPECTIVE_CAMERA;
+    break;
+    default: 
+      CURRENT_CAMERA = PERSPECTIVE_CAMERA;
+    break;
+  }
+  update();
+}
+
+window.moveX = (positive)=>{
+  if(positive){
+    camera[CURRENT_CAMERA].position.x += 1;
+  }else{
+    camera[CURRENT_CAMERA].position.x -= 1;
+  }
 }
 
 
 
-
-window.edges = () => {
-  cubeObject.seeEdgesOfObject();
-
-};
-
-window.addEventListener("mousemove", onMouseMove, false);
-
-
-
 function render() {
-
+  
   raycaster.setFromCamera(mouse, camera[CURRENT_CAMERA]);
 
   var intersects = raycaster.intersectObjects(scene.children);
@@ -85,23 +160,27 @@ function render() {
   if ( intersects.length > 0  && intersects[ 0 ].object.name !== PLANE) {
 
     if ( INTERSECTED != intersects[ 0 ].object ) {
-
-      if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-      
+      console.log(intersects[0].object);
       INTERSECTED = intersects[ 0 ].object;
-      INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-      INTERSECTED.material.emissive.setHex( 0xff0000 );
-
+      // if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+      
+      // INTERSECTED = intersects[ 0 ].object;
+      // INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+      // console.log(INTERSECTED);
+      // INTERSECTED.material.emissive.setHex( 0xff0000 );
     }
 
   } else {
 
-    if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+    // if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+
     INTERSECTED = null;
 
   }
 
+  camera[CURRENT_CAMERA].updateProjectionMatrix();
   renderer.render( scene, camera[CURRENT_CAMERA] );
+  
   requestAnimationFrame( render );
   controls.update();
 
