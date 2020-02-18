@@ -28,11 +28,12 @@ import {
 } from './utils/constants.js';
 import threeDGeometry from './Components/3DGeometry.js';
 import camera from './utils/camera.js';
-import { GUI }from './addons/jsm/libs/dat.gui.module.js';
+import * as dat from  './addons/jsm/libs/dat.gui.module.js';
 
 //variables
 
 export var renderer, controls;
+var container = document.getElementById('desmadre_johan');
 var scene;
 var raycaster = new THREE.Raycaster();
 var objectList = new Map();
@@ -40,6 +41,10 @@ export var INTERSECTED;
 export var CURRENT_CAMERA;
 var i;
 const initialSizes = 10;
+var params = {
+  textField: 'some text'
+}
+
 
 init();
 function init(){
@@ -60,12 +65,12 @@ function init(){
     MIDDLE: THREE.MOUSE.PAN
   };
   //listeners =>
-  window.addEventListener('resize', onWindowResize, false );
-  window.addEventListener('onwheel' , onMousePress, false);
-  window.addEventListener('keydown', onKeyPress, false );
-  window.addEventListener('keyup', onKeyRelease, false);
-  window.addEventListener("mousemove", onMouseMove, false);
-  window.addEventListener("mouseup", onMouseClick, false );
+  container.addEventListener('resize', onWindowResize, false );
+  container.addEventListener('onwheel' , onMousePress, false);
+  container.addEventListener('keydown', onKeyPress, false );
+  container.addEventListener('keyup', onKeyRelease, false);
+  container.addEventListener("mousemove", onMouseMove, false);
+  container.addEventListener("mouseup", onMouseClick, false );
 
 
   //world construction (Don't touch)
@@ -92,6 +97,14 @@ function init(){
   world.add(planeObject.mesh);
   world.name="WORLD";
   scene.add(world);
+  
+  
+  const gui = new dat.GUI();
+  gui.add(params, "textField").onChange((val)=>{
+    params.textField = val;
+  }).setValue(params.textField);
+
+
 
 }
 const update = () =>{
@@ -113,23 +126,31 @@ const update = () =>{
 
     };
   } 
-
 }
+
+
+var currentObject = null;
+
+var gui = new dat.GUI({name: "allObject Controller"});
+
 
 export const showGUI = (selection) => {
 
-  var currentObject = objectList.get(selection.id);
-  var options = currentObject.options;
-  console.log(options);
-  const {position, rotation, scale} = currentObject.options;
-  var gui = new GUI({name:currentObject.name});
+  currentObject = objectList.get(selection.id);
+
+
+  gui = new dat.GUI({name:currentObject.name});
+
+
+
   var posFolder = gui.addFolder("position");
-  for(const key  of Object.keys(position)){
-    posFolder.add(position, key).listen();
+  for(const key  of Object.keys(currentObject.options.position)){
+    gui.add(currentObject.options.position, key, -300,300, 0.2).listen();
   }
+  posFolder.open();
 }
 
-window.changeCamera = (point)=>{
+container.changeCamera = (point)=>{
   console.log("CAMERA")
   switch(point){
     case TOP:
@@ -161,7 +182,7 @@ window.changeCamera = (point)=>{
 }
 
 window.addObject = (object) => {
-
+  console.log("hize algo la chingadera esta");
   let geometry;
   switch(object){
     case "cube":  
@@ -187,10 +208,18 @@ window.addObject = (object) => {
 export const deleteObject = (selection) =>{
   scene.remove(scene.children.find((value) => value.uuid === selection.id));
   objectList.delete(selection.id);
+  currentObject = null;
 }
 
 
 function render() {
+  if(currentObject !== null){ 
+  currentObject.translateObject(currentObject.options.position.x,
+     currentObject.options.position.y,
+      currentObject.options.position.z)
+  }else{
+    gui.close();
+  }
   
   raycaster.setFromCamera(mouse, camera[CURRENT_CAMERA]);
 
@@ -199,7 +228,6 @@ function render() {
   if ( intersects.length > 0  && intersects[ 0 ].object.name !== PLANE) {
 
     if ( INTERSECTED != intersects[ 0 ].object )  INTERSECTED = intersects[ 0 ].object;
-    
   } else {
 
     INTERSECTED = null;

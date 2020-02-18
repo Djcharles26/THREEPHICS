@@ -10,6 +10,7 @@ app.use('/static', express.static('js'));
 
 app.use('/styles' , express.static('css'));
 
+
 app.get('/test' , (req,res) => {res.json("msg: Server works!")});
 
 app.get('/app', (req,res) => res.sendFile(path.join(__dirname + "/html/index.html")));

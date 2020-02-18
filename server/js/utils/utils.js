@@ -4,29 +4,32 @@ import camera from './camera.js';
 import * as THREE from '../build/three.module.js';
 import { PERSPECTIVE_CAMERA } from './constants.js';
 
+var container = document.getElementById('desmadre_johan');
+console.log(container.offsetWidth);
+
 export function getRenderer(){
     var renderer = new THREE.WebGLRenderer({ antialias: true});  
-    document.body.appendChild(renderer.domElement);  
+    container.appendChild(renderer.domElement)
     renderer.setClearColor(0x000000);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize( window.innerWidth, window.innerHeight - 30);
+    renderer.setPixelRatio(container.devicePixelRatio);
+    renderer.setSize( container.offsetWidth, container.offsetHeight);
     return renderer;
     
 }
 
 export function onWindowResize() {
-    var aspect = window.innerWidth / window.innerHeight;
+    var aspect = container.offsetWidth / container.offsetHeight;
     
     camera[CURRENT_CAMERA].aspect  = aspect;
     if(CURRENT_CAMERA !== PERSPECTIVE_CAMERA){
-      camera[CURRENT_CAMERA].left = window.innerWidth / 8;
-      camera[CURRENT_CAMERA].right = window.innerWidth / -8;
-      camera[CURRENT_CAMERA].top = window.innerHeight / 8;
-      camera[CURRENT_CAMERA].bottom = window.innerHeight / -8;
+      camera[CURRENT_CAMERA].left = container.offsetWidth / 8;
+      camera[CURRENT_CAMERA].right = container.offsetWidth / -8;
+      camera[CURRENT_CAMERA].top = container.offsetHeight / 8;
+      camera[CURRENT_CAMERA].bottom = container.offsetHeight / -8;
     }
     
     camera[CURRENT_CAMERA].updateProjectionMatrix();
-    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setSize( container.offsetWidth, container.offsetHeight );
     
 }
 
@@ -42,9 +45,10 @@ export var selection = {
 
 export function onMouseClick(e){
   e.preventDefault();
+
   if(!controls.enabled){
     if(e.button == 0){
-    
+      console.log(INTERSECTED)
       if(INTERSECTED !== null){
         if(INTERSECTED.uuid === selection.id){
           INTERSECTED.material.emissive.setHex(selection.Hex);
@@ -58,6 +62,8 @@ export function onMouseClick(e){
         }
         showGUI(selection);
       }
+    }else if(e.button == 1){
+      
     }
   }
 }
@@ -85,7 +91,7 @@ export function onMouseMove(e){
     e.preventDefault();
 
     
-    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-    mouse.y =  - (e.clientY / window.innerHeight) * 2 + 1;
+    mouse.x = ((e.clientX - 41) / container.offsetWidth) * 2 - 1;
+    mouse.y =  - ((e.clientY -  106) / container.offsetHeight) * 2 + 1;
 
 }
