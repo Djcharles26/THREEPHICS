@@ -7,7 +7,7 @@ import {
     LEFT_CAMERA,
     FRONT_CAMERA,
     BACK_CAMERA,
-}from '../constants.js';
+}from './constants.js';
 
 var camera = [];
 var aspect = window.innerWidth / window.innerHeight;

@@ -1,6 +1,15 @@
 import * as THREE from './build/three.module.js';
 import {OrbitControls} from './addons/jsm/controls/OrbitControls.js';
-import { getRenderer, onWindowResize, onMouseMove, onKeyPress, onKeyRelease, onMousePress, mouse } from './utils.js';
+import { 
+  getRenderer,
+  onWindowResize, 
+  onMouseMove, 
+  onKeyPress, 
+  onKeyRelease, 
+  onMousePress, 
+  onMouseClick, 
+  mouse
+} from './utils/utils.js';
 import {
   PLANE,
   PERSPECTIVE_CAMERA,
@@ -16,26 +25,25 @@ import {
   BOTTOM,
   BACK, 
   PERSPECTIVE
-} from './constants.js';
-
-import threeDGeometry from './objects/3DGeometry.js';
-import List from './components/List.js';
-
-import camera from './cameras/camera.js';
-
+} from './utils/constants.js';
+import threeDGeometry from './Components/3DGeometry.js';
+import camera from './utils/camera.js';
+import { GUI }from './addons/jsm/libs/dat.gui.module.js';
 
 //variables
 
+export var renderer, controls;
 var scene;
 var raycaster = new THREE.Raycaster();
-var objectList = new List();
-export var renderer, controls;
-var INTERSECTED;
+var objectList = new Map();
+export var INTERSECTED;
 export var CURRENT_CAMERA;
-var cube;
+var i;
+const initialSizes = 10;
 
 init();
 function init(){
+  i = 0;
   renderer = getRenderer();
   //camera =>
 
@@ -57,14 +65,14 @@ function init(){
   window.addEventListener('keydown', onKeyPress, false );
   window.addEventListener('keyup', onKeyRelease, false);
   window.addEventListener("mousemove", onMouseMove, false);
-  
+  window.addEventListener("mouseup", onMouseClick, false );
 
 
   //world construction (Don't touch)
   const world = new THREE.Group();
+
+
   //lights => 
-  
-  
   const light = new THREE.AmbientLight(0xffffff, 0.5);
   world.add(light);
   const light2 = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -78,12 +86,11 @@ function init(){
   );
   planeObject.vertex.visible = true;
   planeObject.rotateObject(270 * Math.PI / 180);
- 
-  //elements
-  
-  world.add(planeObject.mesh);
-  
 
+
+  console.log(planeObject.mesh.rotation)
+  world.add(planeObject.mesh);
+  world.name="WORLD";
   scene.add(world);
 
 }
@@ -109,6 +116,13 @@ const update = () =>{
 
 }
 
+export const showGUI = (selection) => {
+
+  var currentObject = objectList.get(selection.id);
+  var options = currentObject.options;
+  var gui = new GUI({name:currentObject.name});
+  gui.add(options, 'position');
+}
 
 window.changeCamera = (point)=>{
   console.log("CAMERA")
@@ -141,14 +155,34 @@ window.changeCamera = (point)=>{
   update();
 }
 
-window.moveX = (positive)=>{
-  if(positive){
-    camera[CURRENT_CAMERA].position.x += 1;
-  }else{
-    camera[CURRENT_CAMERA].position.x -= 1;
+window.addObject = (object) => {
+
+  let geometry;
+  switch(object){
+    case "cube":  
+      geometry = new THREE.BoxGeometry(initialSizes, initialSizes, initialSizes) ;
+    break;
+    case "sphere":
+      geometry = new THREE.SphereGeometry(initialSizes, initialSizes * 10, initialSizes * 10);
+    break;
+    case "toroid": 
+      geometry = new THREE.TorusGeometry(initialSizes, initialSizes / 3, initialSizes, initialSizes * initialSizes)
+    break;
+    case "cone":
+      geometry = new THREE.ConeGeometry(initialSizes, initialSizes * 2, initialSizes);
+    break;
   }
+  var object = new threeDGeometry(`${object}-${i}`, geometry, null, false);
+  objectList.set(object.id, object);
+
+  scene.add(object.mesh);
 }
 
+
+export const deleteObject = (selection) =>{
+  scene.remove(scene.children.find((value) => value.uuid === selection.id));
+  objectList.delete(selection.id);
+}
 
 
 function render() {
@@ -159,24 +193,15 @@ function render() {
 
   if ( intersects.length > 0  && intersects[ 0 ].object.name !== PLANE) {
 
-    if ( INTERSECTED != intersects[ 0 ].object ) {
-      console.log(intersects[0].object);
-      INTERSECTED = intersects[ 0 ].object;
-      // if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-      
-      // INTERSECTED = intersects[ 0 ].object;
-      // INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-      // console.log(INTERSECTED);
-      // INTERSECTED.material.emissive.setHex( 0xff0000 );
-    }
-
+    if ( INTERSECTED != intersects[ 0 ].object )  INTERSECTED = intersects[ 0 ].object;
+    
   } else {
-
-    // if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
 
     INTERSECTED = null;
 
   }
+  
+
 
   camera[CURRENT_CAMERA].updateProjectionMatrix();
   renderer.render( scene, camera[CURRENT_CAMERA] );

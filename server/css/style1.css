@@ -1,0 +1,228 @@
+@import url('https://fonts.googleapis.com/css?family=Zilla+Slab&display=swap');
+
+
+h1{
+    margin: 0;
+}
+
+.Logo{
+    display: flex;
+    line-height: 0;
+    margin: 7px;
+}
+
+.windowBtn{
+    display: flex;
+}
+
+.windowBtn div{
+    display: flex;
+    align-content: center;
+    margin: 0;
+}
+
+.windowBtn div:hover{
+    background-color: #637c8f;
+    cursor: pointer;
+}
+
+.heady{ 
+    flex: 2%;
+    font-family: 'Zilla Slab', serif;
+    letter-spacing: 1.2px;
+    background-color: #40505C;
+    display: flex;
+    color: #FFF;
+    justify-content: space-between;
+    flex-direction: row;
+    align-content: center;
+}
+
+#toolbar{
+    font-family: 'Zilla Slab', serif;
+    background-color: #4c5e6c;
+    color: #FFF;
+    display: flex;
+    justify-content: flex-start;
+    border: 1px solid #41505c;
+}
+
+#toolbar a{
+    font-family: 'Zilla Slab', serif;
+    color: #FFF;
+    display: flex;  
+    justify-content: flex-start;
+    text-decoration: none;
+}
+
+#toolbar a:hover{
+    background-color: #637c8f;
+}
+
+#botonsitos{
+    font-family: 'Zilla Slab', serif;
+    background-color: #4c5e6c;
+    color: #FFF;
+    display: flex;
+    justify-content: flex-start;
+}
+
+#botonsitos div:hover{
+    background-color: #637c8f;
+    cursor: pointer;
+}
+
+
+
+#panel{
+    display: flex;  
+    flex: 80%;
+}
+
+#botonsitos_vertical{
+    flex: 2%;
+    font-family: 'Zilla Slab', serif;
+    background-color: #4c5e6c;
+    color: #FFF;    
+    border: 1px solid #41505c;
+    align-self: stretch;
+}
+
+#botonsitos_vertical div:hover{
+    background-color: #637c8f;
+    cursor: pointer;
+}
+
+#desmadre_johan{
+    flex: 77%;
+}
+
+.footy{
+    flex: 1%;
+    background-color: #98B78A;
+    color: #FFF;
+    flex-direction: row;
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.footy h3{
+    margin: 5px 10px;
+    font-size: 15px;
+}
+
+#propiedades{
+    flex: 20%;
+    min-width: 350px;
+    font-family: 'Zilla Slab', serif;
+    background-color: #4c5e6c;
+    color: #FFF;
+    border: 1px solid #41505c;
+    padding: 20px;
+}
+
+.property-item{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+    align-content: center;
+}
+
+.property-item h4{
+    margin: 3px 15px;
+}
+
+.property-item input{
+    margin: 0px 15px;
+    border: none;
+    background-color: #637c8f;
+    width: 45%;
+    height: 20px;
+}
+
+.card{
+    padding: 10px;
+    border: 1px solid #40505C;
+    box-shadow: 3px 3px 30px 0px #313d46;
+}   
+
+h2{
+    justify-self: center;
+    margin: 10px;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+  
+  
+html, body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin: 0;
+  }
+  
+article, aside, details, figcaption, figure, footer, header, hgroup, main, menu, nav, section, summary {
+    
+    display: flex;
+flex-direction: column;
+    flex: 1;
+    }
+
+
+.content{
+    flex: 90%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin: 0;
+}
+
+.dropbtn {
+  background-color: transparent;
+  color: white;
+  height: 100%;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  height: 25px;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: #555454 !important;
+  padding: 5px;
+  padding-left: 10px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {background-color: #d1d3d4 !important}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown:hover .dropbtn {
+  background-color: #637c8f;
+}
+
+
+
+
+
+

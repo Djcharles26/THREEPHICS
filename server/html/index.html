@@ -6,22 +6,24 @@
     <title>Three.js</title>
     <!--Links-->
     <link href="http://localhost:3000/styles/style.css" rel="stylesheet" type="text/css" />
-    
+
   </head>
   <body>
-    
-    <button onclick="changeCamera(RIGHT)">RIGHT</button>
-    <button onclick="changeCamera(LEFT)">LEFT</button>
-    <button onclick="changeCamera(FRONT)">FRONT</button>
-    <button onclick="changeCamera(BACK)">BACK</button>
-    <button onclick="changeCamera(TOP)">TOP</button>
-    <button onclick="changeCamera(BOTTOM)">BOTTOM</button>
-    <button onclick="changeCamera(PERSPECTIVE)">PERSPECTIVE</button>
-    <button onclick="moveX(true)">+</button>
-    <button onclick="moveX(false)">-</button>
-    <button onclick="addObject("cube")">CUBE</button>
+    <div id="info">
+      <button onclick="changeCamera(RIGHT)">RIGHT</button>
+      <button onclick="changeCamera(LEFT)">LEFT</button>
+      <button onclick="changeCamera(FRONT)">FRONT</button>
+      <button onclick="changeCamera(BACK)">BACK</button>
+      <button onclick="changeCamera(TOP)">TOP</button>
+      <button onclick="changeCamera(BOTTOM)">BOTTOM</button>
+      <button onclick="changeCamera(PERSPECTIVE)">PERSPECTIVE</button>
+      <button onclick="addObject('cube')">CUBE</button>
+      <button onclick="addObject('sphere')">SPHERE</button>
+      <button onclick="addObject('cone')">CONE</button>
+      <button onclick="addObject('toroid')">TOROID</button>
+    </div>
 
-    <script type="module" src="http://localhost:3000/static/constants.js"></script>
+    <script type="module" src="http://localhost:3000/static/utils/constants.js"></script>
     <script type="module" src="http://localhost:3000/static/index.js"></script>
   </body>
 </html>

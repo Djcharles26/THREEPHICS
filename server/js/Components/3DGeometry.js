@@ -1,5 +1,4 @@
 import * as THREE from '../build/three.module.js';
-import {VertexNormalsHelper} from '../addons/jsm/helpers/VertexNormalsHelper.js';
 
 class threeDGeometry {
 
@@ -11,24 +10,57 @@ class threeDGeometry {
         }
         this.geometry = geometry;
         this.material = material;
+        this.name = name;
         //mesh =>
         this.mesh = new THREE.Mesh(geometry, material);
         this.mesh.name = name;
+        this.id = this.mesh.uuid;
 
         //edges =>
         this.edges = new THREE.LineSegments(new THREE.EdgesGeometry(this.geometry), new THREE.LineBasicMaterial( { color:0x00d9ff } ));
         this.edges.visible = false;
 
         //vertex =>
-        this.vertex = new VertexNormalsHelper(this.mesh,2, 0x00ff00, 1000);
+        this.vertex = new THREE.Points(new THREE.Geometry().setFromPoints(geometry.vertices), new THREE.PointsMaterial({
+            color: 0x0080ff,
+            size: 1,
+            alphaTest: 0.5
+        }))
         this.vertex.visible = false;
         
 
-        //axis
+        //axis => 
         this.axis =  new THREE.AxesHelper(15);
         this.axis.visible = axisNeeded;
-        
-        
+
+
+        //GUI OPTIONS => 
+
+
+
+        this.options = {
+            position: {
+                x:0,y:0,z:0
+            },
+            scale : {
+                x:0,y:0,z:0
+                
+            },
+            rotation: {
+                x:0,y:0,z:0
+            },
+            material: {
+                name: 'lala'
+            }
+        }
+
+        console.log(this.options);
+
+        // this.mesh.position.set(this.options.position.x, this.options.position.y, this.options.position.z);
+        // this.mesh.rotation.set(this.options.rotation.x, this.options.rotation.y, this.options.rotation.z);
+        // this.mesh.scale.set(this.options.scale.x, this.options.scale.y, this.options.scale.z);
+
+        //mesh adding =>
         this.mesh.add(this.edges);
         this.mesh.add(this.vertex);
         this.mesh.add(this.axis);    
@@ -45,13 +77,12 @@ class threeDGeometry {
 
     translateObject(x=this.mesh.position.x, y=this.mesh.position.y, z=this.mesh.position.z){
         this.mesh.position.set(x,y,z);
+        
     }
 
     rotateObject(x=this.mesh.rotation.x,y=this.mesh.rotation.y,z=this.mesh.rotation.z){
-        this.mesh.rotateX(x);
-        this.mesh.rotateY(y);
-        this.mesh.rotateZ(z);
-    
+        this.mesh.rotation.set(x,y,z);
+        this.options.rotation = this.mesh.rotation;
 
     }
 
