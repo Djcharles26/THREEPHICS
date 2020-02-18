@@ -120,8 +120,13 @@ export const showGUI = (selection) => {
 
   var currentObject = objectList.get(selection.id);
   var options = currentObject.options;
+  console.log(options);
+  const {position, rotation, scale} = currentObject.options;
   var gui = new GUI({name:currentObject.name});
-  gui.add(options, 'position');
+  var posFolder = gui.addFolder("position");
+  for(const key  of Object.keys(position)){
+    posFolder.add(position, key).listen();
+  }
 }
 
 window.changeCamera = (point)=>{
