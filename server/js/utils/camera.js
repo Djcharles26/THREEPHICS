@@ -9,7 +9,7 @@ import {
     BACK_CAMERA,
 }from './constants.js';
 
-var container = document.getElementById('desmadre_johan');
+var container = document.getElementById('canvas');
 
 var camera = [];
 var aspect = container.offsetWidth / container.offsetHeight;

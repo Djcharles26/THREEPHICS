@@ -1,5 +1,6 @@
 import * as THREE from './build/three.module.js';
 import {OrbitControls} from './addons/jsm/controls/OrbitControls.js';
+import {TransformControls} from './addons/jsm/controls/TransformControls.js';
 import { 
   getRenderer,
   onWindowResize, 
@@ -8,7 +9,8 @@ import {
   onKeyRelease, 
   onMousePress, 
   onMouseClick, 
-  mouse
+  mouse,
+  radians
 } from './utils/utils.js';
 import {
   PLANE,
@@ -33,7 +35,10 @@ import * as dat from  './addons/jsm/libs/dat.gui.module.js';
 //variables
 
 export var renderer, controls;
-var container = document.getElementById('desmadre_johan');
+var currentObject = null;
+var container = document.getElementById('canvas');
+var gui = null;
+var currentSelection = null;
 var scene;
 var raycaster = new THREE.Raycaster();
 var objectList = new Map();
@@ -44,17 +49,20 @@ const initialSizes = 10;
 var params = {
   textField: 'some text'
 }
-
+var bones;
 
 init();
 function init(){
   i = 0;
   renderer = getRenderer();
   //camera =>
-
   CURRENT_CAMERA = PERSPECTIVE_CAMERA;
+
+
   //scene =>
   scene = new THREE.Scene();
+
+
   //controls => 
   controls = new OrbitControls( camera[CURRENT_CAMERA], renderer.domElement );
   controls.enableKeys = false;
@@ -64,6 +72,8 @@ function init(){
     RIGHT:THREE.MOUSE.DOLLY,
     MIDDLE: THREE.MOUSE.PAN
   };
+
+
   //listeners =>
   container.addEventListener('resize', onWindowResize, false );
   container.addEventListener('onwheel' , onMousePress, false);
@@ -73,7 +83,7 @@ function init(){
   container.addEventListener("mouseup", onMouseClick, false );
 
 
-  //world construction (Don't touch)
+  //world construction=>
   const world = new THREE.Group();
 
 
@@ -91,64 +101,19 @@ function init(){
   );
   planeObject.vertex.visible = true;
   planeObject.rotateObject(270 * Math.PI / 180);
-
-
-  console.log(planeObject.mesh.rotation)
+  
+  
   world.add(planeObject.mesh);
   world.name="WORLD";
   scene.add(world);
+
   
   
-  const gui = new dat.GUI();
-  gui.add(params, "textField").onChange((val)=>{
-    params.textField = val;
-  }).setValue(params.textField);
-
 
 
 }
-const update = () =>{
-  controls = new OrbitControls( camera[CURRENT_CAMERA], renderer.domElement );
-  console.log(controls);
-  controls.target = new THREE.Vector3(0,0,0);
-  controls.enableKeys = false;
-  controls.enabled = false;
-  if(CURRENT_CAMERA === PERSPECTIVE_CAMERA)
-  {
-    controls.mouseButtons = {
-      LEFT: THREE.MOUSE.ROTATE,
-      RIGHT:THREE.MOUSE.DOLLY,
-      MIDDLE: THREE.MOUSE.PAN
-    };
-  }else{
-    controls.mouseButtons = {
-      RIGHT:THREE.MOUSE.DOLLY,
-
-    };
-  } 
-}
 
 
-var currentObject = null;
-
-var gui = new dat.GUI({name: "allObject Controller"});
-
-
-export const showGUI = (selection) => {
-
-  currentObject = objectList.get(selection.id);
-
-
-  gui = new dat.GUI({name:currentObject.name});
-
-
-
-  var posFolder = gui.addFolder("position");
-  for(const key  of Object.keys(currentObject.options.position)){
-    gui.add(currentObject.options.position, key, -300,300, 0.2).listen();
-  }
-  posFolder.open();
-}
 
 container.changeCamera = (point)=>{
   console.log("CAMERA")
@@ -181,8 +146,77 @@ container.changeCamera = (point)=>{
   update();
 }
 
+const update = () =>{
+  controls = new OrbitControls( camera[CURRENT_CAMERA], renderer.domElement );
+  console.log(controls);
+  controls.target = new THREE.Vector3(0,0,0);
+  controls.enableKeys = false;
+  controls.enabled = false;
+  if(CURRENT_CAMERA === PERSPECTIVE_CAMERA)
+  {
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      RIGHT:THREE.MOUSE.DOLLY,
+      MIDDLE: THREE.MOUSE.PAN
+    };
+  }else{
+    controls.mouseButtons = {
+      RIGHT:THREE.MOUSE.DOLLY,
+      
+    };
+  } 
+}
+
+
+export const select = (selection) => {
+
+  currentObject = objectList.get(selection.id);
+  if(currentObject !== null){
+    currentObject.material.emissive.setHex(0xff0000); 
+    currentSelection = selection;
+    if(currentObject.transformControls !== null)  currentObject.transformControls.visible = true;
+    //GUI PART =>
+    gui = new dat.GUI({name: "Controller"});
+    document.getElementById("props").appendChild(gui.domElement);
+    var posFolder = gui.addFolder("position");
+    for(const key  of Object.keys(currentObject.options.position)){
+      posFolder.add(currentObject.options.position, key, -300,300, 0.01);
+    }
+    var rotFolder = gui.addFolder("rotation");
+    for(const key of Object.keys(currentObject.options.rotation)){
+      rotFolder.add(currentObject.options.rotation, key, 0, 360, 0.01);
+    }
+
+    var scaleFolder = gui.addFolder("scale");
+    for(const key of Object.keys(currentObject.options.scale)){
+      scaleFolder.add(currentObject.options.scale, key, 0.01,10,0.001);
+    }
+
+    posFolder.open();
+    rotFolder.open();
+    scaleFolder.open();
+
+    
+    window.objectName = currentObject.name;
+
+  }
+  
+}
+
+
+export const unselect = () => {
+  if(currentSelection !== null){
+    var object = objectList.get(currentSelection.id);
+    object.material.emissive.setHex(currentSelection.Hex);
+    currentSelection = null;
+    document.getElementById("props").removeChild(gui.domElement);
+  }
+  window.objectName = "NOMBRE DEL OBJETO";
+}
+
+
+
 window.addObject = (object) => {
-  console.log("hize algo la chingadera esta");
   let geometry;
   switch(object){
     case "cube":  
@@ -198,10 +232,11 @@ window.addObject = (object) => {
       geometry = new THREE.ConeGeometry(initialSizes, initialSizes * 2, initialSizes);
     break;
   }
-  var object = new threeDGeometry(`${object}-${i}`, geometry, null, false);
+  var object = new threeDGeometry(`${object}-${i}`, geometry, null, false, camera[CURRENT_CAMERA], renderer.domElement);
   objectList.set(object.id, object);
 
   scene.add(object.mesh);
+  if(object.transformControls !== null) scene.add(object.transformControls);
 }
 
 
@@ -212,13 +247,20 @@ export const deleteObject = (selection) =>{
 }
 
 
-function render() {
+function animate(){
+  const time = Date.now() * 0.001;
+  const angle = Math.cos(time);
+
+
+
   if(currentObject !== null){ 
-  currentObject.translateObject(currentObject.options.position.x,
-     currentObject.options.position.y,
-      currentObject.options.position.z)
-  }else{
-    gui.close();
+    currentObject.translateObject(currentObject.options.position.x,
+      currentObject.options.position.y,
+      currentObject.options.position.z);
+    currentObject.rotateObject(currentObject.options.rotation.x * Math.PI/180,
+      currentObject.options.rotation.y * Math.PI/180 , currentObject.options.rotation.z * Math.PI/180);  
+    currentObject.scaleObject(currentObject.options.scale.x,
+      currentObject.options.scale.y, currentObject.options.scale.z);
   }
   
   raycaster.setFromCamera(mouse, camera[CURRENT_CAMERA]);
@@ -226,8 +268,7 @@ function render() {
   var intersects = raycaster.intersectObjects(scene.children);
 
   if ( intersects.length > 0  && intersects[ 0 ].object.name !== PLANE) {
-
-    if ( INTERSECTED != intersects[ 0 ].object )  INTERSECTED = intersects[ 0 ].object;
+  if ( INTERSECTED !== intersects[ 0 ].object )  INTERSECTED = intersects[ 0 ].object;
   } else {
 
     INTERSECTED = null;
@@ -237,11 +278,21 @@ function render() {
 
 
   camera[CURRENT_CAMERA].updateProjectionMatrix();
+  requestAnimationFrame(animate);
+
+  controls.update();
+  render();
+}
+
+
+export function render() {
+
+
+  
   renderer.render( scene, camera[CURRENT_CAMERA] );
   
-  requestAnimationFrame( render );
-  controls.update();
+  
 
 }
    
-render();
+animate();

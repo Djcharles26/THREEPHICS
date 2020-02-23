@@ -1,8 +1,10 @@
 import * as THREE from '../build/three.module.js';
+import {TransformControls} from '../addons/jsm/controls/TransformControls.js';
+import { render } from '../index.js';
 
 class threeDGeometry {
 
-    constructor(name, geometry, material, axisNeeded = false){
+    constructor(name, geometry, material, axisNeeded = false, camera = null, element = null){
         if(material === null){
             material = new THREE.MeshLambertMaterial(
                 { color: 0xF3FFE2, wireframe:false }
@@ -33,6 +35,15 @@ class threeDGeometry {
         this.axis =  new THREE.AxesHelper(15);
         this.axis.visible = axisNeeded;
 
+        //transform controls => 
+        this.transformControls = null;
+        if(camera !== null && element !== null){
+            this.transformControls = new TransformControls(camera,element);
+            this.transformControls.addEventListener('change',render); 
+            this.transformControls.attach(this.mesh);     
+            this.transformControls.visible = false;  
+            this.transformControls.setSize(0.7);
+        }
 
         //GUI OPTIONS => 
 
@@ -45,7 +56,7 @@ class threeDGeometry {
                 z: this.mesh.position.z
             },
             scale : {
-                x:0,y:0,z:0
+                x:1,y:1,z:1
                 
             },
             rotation: {
@@ -54,7 +65,6 @@ class threeDGeometry {
             material: 'lala'
         }
 
-        console.log(this.options);
 
         //mesh adding =>
         this.mesh.add(this.edges);
@@ -77,13 +87,13 @@ class threeDGeometry {
     }
 
     rotateObject(x=this.mesh.rotation.x,y=this.mesh.rotation.y,z=this.mesh.rotation.z){
+        
         this.mesh.rotation.set(x,y,z);
-        this.options.rotation = this.mesh.rotation;
 
     }
 
     scaleObject(x=this.mesh.scale.x,y=this.mesh.scale.y,z=this.mesh.scale.z){
-        this.mesh.scale(x,y,z);
+        this.mesh.scale.set(x,y,z);
     }
 }
 

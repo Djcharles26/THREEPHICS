@@ -93,7 +93,7 @@ h1{
     cursor: pointer;
 }
 
-#desmadre_johan{
+#canvas{
     flex: 77%;
 }
 
@@ -114,8 +114,7 @@ h1{
 
 #propiedades{
     flex: 20%;
-    min-width: 350px;
-    font-family: 'Zilla Slab', serif;
+    min-width: 300px;
     background-color: #4c5e6c;
     color: #FFF;
     border: 1px solid #41505c;
