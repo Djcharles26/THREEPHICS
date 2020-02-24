@@ -1,6 +1,6 @@
 import * as THREE from '../build/three.module.js';
 import {TransformControls} from '../addons/jsm/controls/TransformControls.js';
-import { render } from '../index.js';
+import { animate } from '../index.js';
 
 class threeDGeometry {
 
@@ -39,7 +39,7 @@ class threeDGeometry {
         this.transformControls = null;
         if(camera !== null && element !== null){
             this.transformControls = new TransformControls(camera,element);
-            this.transformControls.addEventListener('change',render); 
+            this.transformControls.addEventListener('change',animate); 
             this.transformControls.attach(this.mesh);     
             this.transformControls.visible = false;  
             this.transformControls.setSize(0.7);

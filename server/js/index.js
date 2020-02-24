@@ -1,6 +1,5 @@
 import * as THREE from './build/three.module.js';
 import {OrbitControls} from './addons/jsm/controls/OrbitControls.js';
-import {TransformControls} from './addons/jsm/controls/TransformControls.js';
 import { 
   getRenderer,
   onWindowResize, 
@@ -169,49 +168,53 @@ const update = () =>{
 
 
 export const select = (selection) => {
+  if(currentSelection === null){
+    currentObject = objectList.get(selection.id);
+    if(currentObject !== null){
+      currentObject.material.emissive.setHex(0xff0000); 
+      currentSelection = selection;
+      if(currentObject.transformControls !== null)  currentObject.transformControls.visible = true;
+      //GUI PART =>
+      gui = new dat.GUI({name: "Controller"});
+      document.getElementById("props").appendChild(gui.domElement);
+      var posFolder = gui.addFolder("position");
+      for(const key  of Object.keys(currentObject.options.position)){
+        posFolder.add(currentObject.options.position, key, -300,300, 0.01);
+      }
+      var rotFolder = gui.addFolder("rotation");
+      for(const key of Object.keys(currentObject.options.rotation)){
+        rotFolder.add(currentObject.options.rotation, key, 0, 360, 0.01);
+      }
 
-  currentObject = objectList.get(selection.id);
-  if(currentObject !== null){
-    currentObject.material.emissive.setHex(0xff0000); 
-    currentSelection = selection;
-    if(currentObject.transformControls !== null)  currentObject.transformControls.visible = true;
-    //GUI PART =>
-    gui = new dat.GUI({name: "Controller"});
-    document.getElementById("props").appendChild(gui.domElement);
-    var posFolder = gui.addFolder("position");
-    for(const key  of Object.keys(currentObject.options.position)){
-      posFolder.add(currentObject.options.position, key, -300,300, 0.01);
+      var scaleFolder = gui.addFolder("scale");
+      for(const key of Object.keys(currentObject.options.scale)){
+        scaleFolder.add(currentObject.options.scale, key, 0.01,10,0.001);
+      }
+
+      posFolder.open();
+      rotFolder.open();
+      scaleFolder.open();
+
+      
+      window.objectName = currentObject.name;
+
     }
-    var rotFolder = gui.addFolder("rotation");
-    for(const key of Object.keys(currentObject.options.rotation)){
-      rotFolder.add(currentObject.options.rotation, key, 0, 360, 0.01);
-    }
-
-    var scaleFolder = gui.addFolder("scale");
-    for(const key of Object.keys(currentObject.options.scale)){
-      scaleFolder.add(currentObject.options.scale, key, 0.01,10,0.001);
-    }
-
-    posFolder.open();
-    rotFolder.open();
-    scaleFolder.open();
-
-    
-    window.objectName = currentObject.name;
-
-  }
+}
   
 }
 
 
 export const unselect = () => {
   if(currentSelection !== null){
+    if(currentObject.transformControls !== null){ 
+       currentObject.transformControls.visible = false;
+       currentObject.transformControls.enabled = false;
+      }
     var object = objectList.get(currentSelection.id);
     object.material.emissive.setHex(currentSelection.Hex);
     currentSelection = null;
     document.getElementById("props").removeChild(gui.domElement);
   }
-  window.objectName = "NOMBRE DEL OBJETO";
 }
 
 
@@ -236,20 +239,28 @@ window.addObject = (object) => {
   objectList.set(object.id, object);
 
   scene.add(object.mesh);
+
   if(object.transformControls !== null) scene.add(object.transformControls);
 }
 
 
-export const deleteObject = (selection) =>{
-  scene.remove(scene.children.find((value) => value.uuid === selection.id));
-  objectList.delete(selection.id);
-  currentObject = null;
+export const deleteObject = () =>{
+  if(currentSelection !==  null){
+    scene.remove(scene.children.find((value) => value.uuid === currentSelection.id));
+    scene.remove(currentObject.transformControls);
+    objectList.delete(currentSelection.id);
+    console.log(currentObject);
+    
+    currentObject = null;
+    currentSelection = null;
+
+  }
+
 }
 
 
-function animate(){
-  const time = Date.now() * 0.001;
-  const angle = Math.cos(time);
+
+export function animate(){
 
 
 
@@ -262,6 +273,7 @@ function animate(){
     currentObject.scaleObject(currentObject.options.scale.x,
       currentObject.options.scale.y, currentObject.options.scale.z);
   }
+
   
   raycaster.setFromCamera(mouse, camera[CURRENT_CAMERA]);
 
@@ -275,17 +287,17 @@ function animate(){
 
   }
   
-
-
   camera[CURRENT_CAMERA].updateProjectionMatrix();
   requestAnimationFrame(animate);
 
   controls.update();
   render();
+
+
 }
 
 
-export function render() {
+function render() {
 
 
   

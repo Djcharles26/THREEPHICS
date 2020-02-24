@@ -73,7 +73,7 @@ export function onKeyPress(e){
   e.preventDefault();
   if(e.keyCode === 18) controls.enabled = true;
   else if(e.keyCode === 116) window.location.reload();
-  else if(e.keyCode === 46) deleteObject(selection);
+  else if(e.keyCode === 46) deleteObject();
 }
 
 export function onKeyRelease(e){
