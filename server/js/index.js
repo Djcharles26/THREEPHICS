@@ -1,4 +1,5 @@
 import * as THREE from './build/three.module.js';
+import {IK, IKChain, IKBallConstraint, IKJoint, IKHelper} from './build/three-ik.module.js';
 import {OrbitControls} from './addons/jsm/controls/OrbitControls.js';
 import { 
   getRenderer,
@@ -30,7 +31,6 @@ import {
 import threeDGeometry from './Components/3DGeometry.js';
 import camera from './utils/camera.js';
 import * as dat from  './addons/jsm/libs/dat.gui.module.js';
-
 //variables
 
 export var renderer, controls, _settingParent = false;
@@ -48,7 +48,7 @@ const initialSizes = 10;
 var params = {
   textField: 'some text'
 }
-var bones;
+
 
 init();
 function init(){
@@ -106,9 +106,10 @@ function init(){
   world.name="WORLD";
   scene.add(world);
 
-  
-  
+  //IK programming =>
 
+
+  
 
 }
 
@@ -204,23 +205,36 @@ export const select = (selection) => {
       //TODO: If has children
       currentSelection.object.mesh.children.forEach((child, index) =>{
         if(child.type === "Mesh"){
-          var options = {...currentSelection.object.options};
-          currentChildrenOptions.push(options);
-          var childFolder = parentFolder.addFolder(child.name);
-          var posFolder = childFolder.addFolder("position");
-          for(const key  of Object.keys(currentSelection.object.options.position)){
-            posFolder.add(currentSelection.object.options.position, key, -300,300, 0.01);
-          }
-          var rotFolder = childFolder.addFolder("rotation");
-          for(const key of Object.keys(currentSelection.object.options.rotation)){
-            rotFolder.add(currentSelection.object.options.rotation, key, 0, 360, 0.01);
-          }
-
-          var scaleFolder = childFolder.addFolder("scale");
-          for(const key of Object.keys(currentSelection.object.options.scale)){
-            scaleFolder.add(currentSelection.object.options.scale, key, 0.01,10,0.001);
-          }
+          var options = {
+            position: {
+                x: child.position.x,
+                y: child.position.y,
+                z: child.position.z
+            },
+            scale : {
+                x:child.scale.x,y:child.scale.y,z:child.scale.z
+                
+            },
+            rotation: {
+                x:child.rotation.x,y:child.rotation.y,z:child.rotation.z
+            }
         }
+        var childFolder = parentFolder.addFolder(child.name);
+        var posFolder = childFolder.addFolder("position");
+        for(const key  of Object.keys(options.position)){
+          posFolder.add(options.position, key, -300,300, 0.01);
+        }
+        var rotFolder = childFolder.addFolder("rotation");
+        for(const key of Object.keys(options.rotation)){
+          rotFolder.add(options.rotation, key, 0, 360, 0.01);
+        }
+        
+        var scaleFolder = childFolder.addFolder("scale");
+        for(const key of Object.keys(options.scale)){
+          scaleFolder.add(options.scale, key, 0.01,10,0.001);
+        }
+        currentChildrenOptions.push(options);
+      }
       })
       parentFolder.open();
       posFolder.open();
@@ -245,7 +259,6 @@ export const unselect = () => {
         child.material.emissive.setHex(currentSelection.Hex);
       }
     })
-    //object.material.emissive.setHex(currentSelection.Hex);
     currentSelection = null;
     currentChildrenOptions = [];
     document.getElementById("props").removeChild(gui.domElement);
@@ -266,7 +279,6 @@ window.setParent = setParent;
 
 export const associate = (id) => {
   var childObject = objectList.get(id);
-  //scene.remove(childObject.mesh);
   currentSelection.object.mesh.attach(childObject.mesh);
   currentSelection.object.mesh.updateMatrixWorld();
   _settingParent = false;
@@ -312,9 +324,49 @@ export const deleteObject = () =>{
 
 }
 
+const ik = new IK();
 
+const chain = new IKChain();
+const constraints = [new IKBallConstraint(180)];
+const bones = [];
+
+// Create a target that the IK's effector will reach
+// for.
+const movingTarget = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+movingTarget.position.z = 10;
+const pivot = new THREE.Object3D();
+pivot.add(movingTarget);
+scene.add(pivot);
+
+// Create a chain of THREE.Bone's, each wrapped as an IKJoint
+// and added to the IKChain
+for (let i = 0; i < 100; i++) {
+  const bone = new THREE.Bone();
+  bone.position.y = i === 0 ? 0 : 0.5;
+
+  if (bones[i - 1]) { bones[i - 1].add(bone); }
+  bones.push(bone);
+
+  // The last IKJoint must be added with a `target` as an end effector.
+  const target = i === 99 ? movingTarget : null;
+  chain.add(new IKJoint(bone, { constraints }), { target });
+}
+
+// Add the chain to the IK system
+ik.add(chain);
+
+// Ensure the root bone is added somewhere in the scene
+scene.add(ik.getRootBone());
+
+// Create a helper and add to the scene so we can visualize
+// the bones
+const helper = new IKHelper(ik);
+scene.add(helper);
 
 export function animate(){
+
+
+  ik.solve();
 
   if(currentSelection !== null){ 
     currentSelection.object.translateObject(currentSelection.object.options.position.x,
@@ -324,10 +376,13 @@ export function animate(){
       currentSelection.object.options.rotation.y * Math.PI/180 , currentSelection.object.options.rotation.z * Math.PI/180);  
     currentSelection.object.scaleObject(currentSelection.object.options.scale.x,
       currentSelection.object.options.scale.y, currentSelection.object.options.scale.z);
-    var j;
+    var j = 0;
     currentSelection.object.mesh.children.forEach((child) => {
       if(child.type === "Mesh"){
-        
+        child.position.set(currentChildrenOptions[j].position.x,currentChildrenOptions[j].position.y, currentChildrenOptions[j].position.z);
+        child.rotation.set(currentChildrenOptions[j].rotation.x,currentChildrenOptions[j].rotation.y, currentChildrenOptions[j].rotation.z);
+        child.scale.set(currentChildrenOptions[j].scale.x,currentChildrenOptions[j].scale.y, currentChildrenOptions[j].scale.z);
+        j++;
       }
     })
   }
@@ -360,7 +415,7 @@ export function animate(){
 
 function render() {
 
-
+  
   
   renderer.render( scene, camera[CURRENT_CAMERA] );
   
