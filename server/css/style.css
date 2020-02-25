@@ -1,5 +1,8 @@
 @import url('https://fonts.googleapis.com/css?family=Zilla+Slab&display=swap');
 
+::-webkit-scrollbar {
+    display: none;
+}
 
 h1{
     margin: 0;
@@ -67,7 +70,15 @@ h1{
     justify-content: flex-start;
 }
 
-#botonsitos div:hover{
+#botonsitos button{
+    padding: 0;
+    margin: 0;
+    width: 40px; 
+    height: 40px; 
+    background-color: transparent; 
+    border:none;
+}
+#botonsitos button:hover{
     background-color: #637c8f;
     cursor: pointer;
 }

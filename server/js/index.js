@@ -115,7 +115,7 @@ function init(){
 
 
 
-container.changeCamera = (point)=>{
+window.changeCamera = (point)=>{
   console.log("CAMERA")
   switch(point){
     case TOP:
@@ -170,6 +170,8 @@ const update = () =>{
 
 export const select = (selection) => {
   if(currentSelection === null){
+    document.getElementById("select-btn").style.display = 'flex';
+    document.getElementById("unselect-btn").style.display = 'flex';
     currentSelection = {};
     currentSelection.object = objectList.get(selection.id);
     if(currentSelection.object !== null){
@@ -252,6 +254,9 @@ export const select = (selection) => {
 
 export const unselect = () => {
   if(currentSelection !== null){
+    document.getElementById('object-name').innerHTML = '[  ]';
+    document.getElementById("select-btn").style.display = 'flex';
+    document.getElementById("unselect-btn").style.display = 'flex';
     var object = objectList.get(currentSelection.id)
     currentSelection.object.material.emissive.setHex(currentSelection.Hex);
     currentSelection.object.mesh.children.forEach((child) => {
@@ -283,6 +288,7 @@ export const associate = (id) => {
   currentSelection.object.mesh.updateMatrixWorld();
   _settingParent = false;
   console.log(scene.children)
+  window.alert('Associate Done');
   unselect();
 }
 
@@ -303,6 +309,7 @@ window.addObject = (object) => {
     break;
   }
   var object = new threeDGeometry(`${object}-${i}`, geometry, null, false, camera[CURRENT_CAMERA], renderer.domElement);
+  document.getElementById('object-name').innerHTML = '[  '+object.name+'  ]';
   objectList.set(object.id, object);
   i++;
   scene.add(object.mesh);
@@ -312,11 +319,13 @@ window.addObject = (object) => {
 
 export const deleteObject = () =>{
   if(currentSelection !==  null){
+    document.getElementById("select-btn").style.display = 'flex';
+    document.getElementById("unselect-btn").style.display = 'flex';
     scene.remove(scene.children.find((value) => value.uuid === currentSelection.id));
     scene.remove(currentSelection.object.transformControls);
     objectList.delete(currentSelection.id);
     console.log(currentSelection.object);
-    
+    document.getElementById('object-name').innerHTML = '[  ]';
     currentSelection.object = null;
     currentSelection = null;
 
@@ -327,31 +336,31 @@ export const deleteObject = () =>{
 const ik = new IK();
 
 const chain = new IKChain();
-const constraints = [new IKBallConstraint(180)];
+const constraints = [new IKBallConstraint(270)];
 const bones = [];
 
 // Create a target that the IK's effector will reach
 // for.
-const movingTarget = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
-movingTarget.position.z = 50 ;
+const movingTarget = new THREE.Mesh(new THREE.SphereGeometry(10), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+movingTarget.position.z = 70 ;
 const pivot = new THREE.Object3D();
 pivot.add(movingTarget);
 scene.add(pivot);
 
 // Create a chain of THREE.Bone's, each wrapped as an IKJoint
 // and added to the IKChain
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 5; i++) {
   const bone = new THREE.Bone();
-  bone.position.y = i === 0 ? 0 : 10;
+  bone.position.y = i === 0 ? 0 : 50;
 
   if (bones[i - 1]) { bones[i - 1].add(bone); }
   bones.push(bone);
 
   // The last IKJoint must be added with a `target` as an end effector.
-  const target = i === 9 ? movingTarget : null;
-  chain.add(new IKJoint(bone, { constraints }), { target });
+  const target = i === 4 ? movingTarget : null;
+  chain.add(new IKJoint(bone, { constraints }), {  });
+  
 }
-
 // Add the chain to the IK system
 ik.add(chain);
 
@@ -400,8 +409,7 @@ export function animate(){
   if ( intersects.length > 0  && intersects[ 0 ].object.name !== PLANE) {
     if ( INTERSECTED !== intersects[ 0 ].object ) { 
       INTERSECTED = intersects[ 0 ].object;
-      console.log(INTERSECTED);
-    }
+      }
   } else {
 
     INTERSECTED = null;
@@ -424,7 +432,7 @@ function render() {
 
   pivot.rotation.x += 0.01;
   pivot.rotation.y += 0.01;
-
+  pivot.rotation.z += 0.01;
 
   renderer.render( scene, camera[CURRENT_CAMERA] );
   

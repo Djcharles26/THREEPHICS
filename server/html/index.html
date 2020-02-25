@@ -59,26 +59,50 @@
             </div>
         </div>
         <div id="botonsitos">
-            <div onclick="addObject('cube')">
-                <span class="glyphicon glyphicon-signal" style=" margin-top: 10px; margin-bottom: 10px; align-items: center; font-size: 20px; margin-right: 10px; margin-left: 10px;"></span> 
-            </div>
-            <div>
-                <span class="glyphicon glyphicon-ok" style=" margin-top: 10px; margin-bottom: 10px; align-items: center; font-size: 20px; margin-right: 10px; margin-left: 10px;"></span> 
-            </div>
-            <div>
-                <span class="glyphicon glyphicon-remove" style=" margin-top: 10px; margin-bottom: 10px; align-items: center; font-size: 20px; margin-right: 10px; margin-left: 10px;"></span> 
-            </div>
-            <div>
-                <span onclick="setParent()">Apachurrame</span>
-            </div>
+            <button onclick="addObject('cube')">
+                <img src="http://localhost:3000/icons/3d.png" alt="Cube">
+            </button>
+            <button onclick="addObject('toroid')">
+                <img src="http://localhost:3000/icons/donut(1).png" alt="Cube">
+            </button>
+            <button onclick="addObject('sphere')">
+                <img src="http://localhost:3000/icons/sphere.png" alt="Cube">
+            </button>
+            <button onclick="addObject('cone')">
+                <img src="http://localhost:3000/icons/geometrico.png" alt="Cube">
+            </button>
+            <button onclick="">
+                <img src="http://localhost:3000/icons/bone.png" alt="Cube">
+            </button>
+            <button id="select-btn" onclick="setParent()" style="display: none; height: 40px;align-self: center;">
+                <img src="http://localhost:3000/icons/enlace.png" alt="Unir" style="width: 24px;height: 24px;align-self: center;justify-self: center;margin-left: 8px;">
+            </button>
+            <button id="unselect-btn" onclick="" style="display: none; height: 40px;align-self: center;">
+                <img src="http://localhost:3000/icons/cadena.png" alt="Unir" style="width: 24px;height: 24px;align-self: center;justify-self: center;margin-left: 8px;">
+            </button>
         </div>
         <div id="panel">
             <div id="botonsitos_vertical">
-                <div>
-                    <span class="glyphicon glyphicon-remove" style=" align-items: center; font-size: 20px; margin: 10px;"></span> 
+                <div onclick="changeCamera(TOP)">
+                    <span class="glyphicon glyphicon-menu-up" style=" align-items: center; font-size: 20px; margin: 10px;"></span> 
+                </div>
+                <div onclick="changeCamera(BOTTOM)">
+                    <span class="glyphicon glyphicon-menu-down" style=" align-items: center; font-size: 20px; margin: 10px;"></span> 
+                </div>
+                <div onclick="changeCamera(LEFT)">
+                    <span class="glyphicon glyphicon-menu-left" style=" align-items: center; font-size: 20px; margin: 10px;"></span> 
+                </div>
+                <div onclick="changeCamera(RIGHT)">
+                    <span class="glyphicon glyphicon-menu-right" style=" align-items: center; font-size: 20px; margin: 10px;"></span> 
+                </div>
+                <div onclick="changeCamera(FRONT)">
+                    <span class="glyphicon glyphicon-stop" style=" align-items: center; font-size: 20px; margin: 10px;"></span> 
+                </div>
+                <div onclick="changeCamera(PERSPECTIVE)">
+                    <span class="glyphicon glyphicon-screenshot" style=" align-items: center; font-size: 20px; margin: 10px;"></span> 
                 </div>
                 
-            </div>
+            </div>  
             <div id="canvas" style="height: 100%; ">
 
                 
@@ -96,7 +120,7 @@
     </section>
     <section class="footy">
         <h3>[ Nombre del Archivo ]</h3>
-        <h3>[ Nombre del Objeto ]</h3>
+        <h3 id="object-name">[ Nombre del Objeto ]</h3>
     </section>
     <script type="module" src="http://localhost:3000/static/utils/constants.js"></script>
     <script type="module" src="http://localhost:3000/static/index.js"></script>
