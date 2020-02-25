@@ -41,7 +41,7 @@ var currentChildrenOptions = [];
 var scene;
 var raycaster = new THREE.Raycaster();
 var objectList = new Map();
-export var INTERSECTED;
+export var INTERSECTED, INTERSECTED_BONE;
 export var CURRENT_CAMERA;
 var i;
 const initialSizes = 10;
@@ -333,22 +333,22 @@ const bones = [];
 // Create a target that the IK's effector will reach
 // for.
 const movingTarget = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
-movingTarget.position.z = 10;
+movingTarget.position.z = 50 ;
 const pivot = new THREE.Object3D();
 pivot.add(movingTarget);
 scene.add(pivot);
 
 // Create a chain of THREE.Bone's, each wrapped as an IKJoint
 // and added to the IKChain
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 10; i++) {
   const bone = new THREE.Bone();
-  bone.position.y = i === 0 ? 0 : 0.5;
+  bone.position.y = i === 0 ? 0 : 10;
 
   if (bones[i - 1]) { bones[i - 1].add(bone); }
   bones.push(bone);
 
   // The last IKJoint must be added with a `target` as an end effector.
-  const target = i === 99 ? movingTarget : null;
+  const target = i === 9 ? movingTarget : null;
   chain.add(new IKJoint(bone, { constraints }), { target });
 }
 
@@ -358,9 +358,14 @@ ik.add(chain);
 // Ensure the root bone is added somewhere in the scene
 scene.add(ik.getRootBone());
 
+console.log(ik);
 // Create a helper and add to the scene so we can visualize
 // the bones
-const helper = new IKHelper(ik);
+const helper = new IKHelper(ik, {
+  boneSize: 1,
+  wireframe: false
+});
+helper.showAxes = false;
 scene.add(helper);
 
 export function animate(){
@@ -390,7 +395,7 @@ export function animate(){
   
   raycaster.setFromCamera(mouse, camera[CURRENT_CAMERA]);
 
-  var intersects = raycaster.intersectObjects(scene.children);
+  var intersects = raycaster.intersectObjects(scene.children, true );
 
   if ( intersects.length > 0  && intersects[ 0 ].object.name !== PLANE) {
     if ( INTERSECTED !== intersects[ 0 ].object ) { 
@@ -402,6 +407,8 @@ export function animate(){
     INTERSECTED = null;
 
   }
+
+  
   
   camera[CURRENT_CAMERA].updateProjectionMatrix();
   requestAnimationFrame(animate);
@@ -415,8 +422,10 @@ export function animate(){
 
 function render() {
 
-  
-  
+  pivot.rotation.x += 0.01;
+  pivot.rotation.y += 0.01;
+
+
   renderer.render( scene, camera[CURRENT_CAMERA] );
   
   
