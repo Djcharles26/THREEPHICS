@@ -1,5 +1,5 @@
 //import * as THREE from './three.module';
-import {renderer, controls, CURRENT_CAMERA , INTERSECTED, deleteObject, unselect, select } from '../index.js';
+import {renderer, controls, CURRENT_CAMERA , INTERSECTED, deleteObject, unselect, select, _settingParent, associate } from '../index.js';
 import camera from './camera.js';
 import * as THREE from '../build/three.module.js';
 import { PERSPECTIVE_CAMERA } from './constants.js';
@@ -49,17 +49,25 @@ export function onMouseClick(e){
     if(e.button == 0){
       
       if(INTERSECTED !== null){
-        if(INTERSECTED.uuid === selection.id){
-          selection = {}
-          unselect();
-        }else{
-          selection.id = INTERSECTED.uuid;
-          selection.Hex= INTERSECTED.material.emissive.getHex();
-          
-          select(selection);
+        if(!_settingParent){
+          if(INTERSECTED.uuid === selection.id){
+            selection = {}
+            unselect();
+          }else{
+            unselect();
+            selection.id = INTERSECTED.uuid;
+            selection.Hex= INTERSECTED.material.emissive.getHex();
+            
+            select(selection);
 
+          }
+        }else{
+          if(INTERSECTED.uuid !== selection.id){
+            console.log(`Associating ${INTERSECTED.uuid} as child with ${selection.id} as Parent`);
+            associate(INTERSECTED.uuid);
+            
+          }
         }
-        
       }else{
         unselect();
         selection = {};

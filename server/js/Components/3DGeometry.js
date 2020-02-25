@@ -1,10 +1,8 @@
 import * as THREE from '../build/three.module.js';
-import {TransformControls} from '../addons/jsm/controls/TransformControls.js';
-import { animate } from '../index.js';
 
 class threeDGeometry {
 
-    constructor(name, geometry, material, axisNeeded = false, camera = null, element = null){
+    constructor(name, geometry, material, axisNeeded = false){
         if(material === null){
             material = new THREE.MeshLambertMaterial(
                 { color: 0xF3FFE2, wireframe:false }
@@ -36,14 +34,7 @@ class threeDGeometry {
         this.axis.visible = axisNeeded;
 
         //transform controls => 
-        this.transformControls = null;
-        if(camera !== null && element !== null){
-            this.transformControls = new TransformControls(camera,element);
-            this.transformControls.addEventListener('change',animate); 
-            this.transformControls.attach(this.mesh);     
-            this.transformControls.visible = false;  
-            this.transformControls.setSize(0.7);
-        }
+
 
         //GUI OPTIONS => 
 

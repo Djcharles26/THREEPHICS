@@ -33,11 +33,11 @@ import * as dat from  './addons/jsm/libs/dat.gui.module.js';
 
 //variables
 
-export var renderer, controls;
-var currentObject = null;
+export var renderer, controls, _settingParent = false;
 var container = document.getElementById('canvas');
 var gui = null;
 var currentSelection = null;
+var currentChildrenOptions = [];
 var scene;
 var raycaster = new THREE.Raycaster();
 var objectList = new Map();
@@ -169,34 +169,66 @@ const update = () =>{
 
 export const select = (selection) => {
   if(currentSelection === null){
-    currentObject = objectList.get(selection.id);
-    if(currentObject !== null){
-      currentObject.material.emissive.setHex(0xff0000); 
-      currentSelection = selection;
-      if(currentObject.transformControls !== null)  currentObject.transformControls.visible = true;
+    currentSelection = {};
+    currentSelection.object = objectList.get(selection.id);
+    if(currentSelection.object !== null){
+      currentSelection.object.material.emissive.setHex(0xff0000); 
+      //If has children
+      
+      currentSelection.object.mesh.children.forEach((child, index) =>{
+        if(child.type === "Mesh"){
+          child.material.emissive.setHex(0xff0000);
+
+        }
+      })
+      currentSelection.id = selection.id;
+      currentSelection.Hex = selection.Hex;
+      
       //GUI PART =>
       gui = new dat.GUI({name: "Controller"});
       document.getElementById("props").appendChild(gui.domElement);
-      var posFolder = gui.addFolder("position");
-      for(const key  of Object.keys(currentObject.options.position)){
-        posFolder.add(currentObject.options.position, key, -300,300, 0.01);
+      var parentFolder = gui.addFolder(currentSelection.object.name);
+      var posFolder = parentFolder.addFolder("position");
+      for(const key  of Object.keys(currentSelection.object.options.position)){
+        posFolder.add(currentSelection.object.options.position, key, -300,300, 0.01);
       }
-      var rotFolder = gui.addFolder("rotation");
-      for(const key of Object.keys(currentObject.options.rotation)){
-        rotFolder.add(currentObject.options.rotation, key, 0, 360, 0.01);
-      }
-
-      var scaleFolder = gui.addFolder("scale");
-      for(const key of Object.keys(currentObject.options.scale)){
-        scaleFolder.add(currentObject.options.scale, key, 0.01,10,0.001);
+      var rotFolder = parentFolder.addFolder("rotation");
+      for(const key of Object.keys(currentSelection.object.options.rotation)){
+        rotFolder.add(currentSelection.object.options.rotation, key, 0, 360, 0.01);
       }
 
+      var scaleFolder = parentFolder.addFolder("scale");
+      for(const key of Object.keys(currentSelection.object.options.scale)){
+        scaleFolder.add(currentSelection.object.options.scale, key, 0.01,10,0.001);
+      }
+      //TODO: If has children
+      currentSelection.object.mesh.children.forEach((child, index) =>{
+        if(child.type === "Mesh"){
+          var options = {...currentSelection.object.options};
+          currentChildrenOptions.push(options);
+          var childFolder = parentFolder.addFolder(child.name);
+          var posFolder = childFolder.addFolder("position");
+          for(const key  of Object.keys(currentSelection.object.options.position)){
+            posFolder.add(currentSelection.object.options.position, key, -300,300, 0.01);
+          }
+          var rotFolder = childFolder.addFolder("rotation");
+          for(const key of Object.keys(currentSelection.object.options.rotation)){
+            rotFolder.add(currentSelection.object.options.rotation, key, 0, 360, 0.01);
+          }
+
+          var scaleFolder = childFolder.addFolder("scale");
+          for(const key of Object.keys(currentSelection.object.options.scale)){
+            scaleFolder.add(currentSelection.object.options.scale, key, 0.01,10,0.001);
+          }
+        }
+      })
+      parentFolder.open();
       posFolder.open();
       rotFolder.open();
       scaleFolder.open();
 
       
-      window.objectName = currentObject.name;
+      window.objectName = currentSelection.object.name;
 
     }
 }
@@ -206,18 +238,41 @@ export const select = (selection) => {
 
 export const unselect = () => {
   if(currentSelection !== null){
-    if(currentObject.transformControls !== null){ 
-       currentObject.transformControls.visible = false;
-       currentObject.transformControls.enabled = false;
+    var object = objectList.get(currentSelection.id)
+    currentSelection.object.material.emissive.setHex(currentSelection.Hex);
+    currentSelection.object.mesh.children.forEach((child) => {
+      if(child.type === "Mesh"){
+        child.material.emissive.setHex(currentSelection.Hex);
       }
-    var object = objectList.get(currentSelection.id);
-    object.material.emissive.setHex(currentSelection.Hex);
+    })
+    //object.material.emissive.setHex(currentSelection.Hex);
     currentSelection = null;
+    currentChildrenOptions = [];
     document.getElementById("props").removeChild(gui.domElement);
   }
 }
 
+const setParent = () => {
+  if(currentSelection !== null){
+    _settingParent = true;
+    console.log("Ready to associate");
+  }else{
+    _settingParent  = false;
+    console.log("First select an object")
+  }
+}
 
+window.setParent = setParent;
+
+export const associate = (id) => {
+  var childObject = objectList.get(id);
+  //scene.remove(childObject.mesh);
+  currentSelection.object.mesh.attach(childObject.mesh);
+  currentSelection.object.mesh.updateMatrixWorld();
+  _settingParent = false;
+  console.log(scene.children)
+  unselect();
+}
 
 window.addObject = (object) => {
   let geometry;
@@ -237,21 +292,20 @@ window.addObject = (object) => {
   }
   var object = new threeDGeometry(`${object}-${i}`, geometry, null, false, camera[CURRENT_CAMERA], renderer.domElement);
   objectList.set(object.id, object);
-
+  i++;
   scene.add(object.mesh);
 
-  if(object.transformControls !== null) scene.add(object.transformControls);
 }
 
 
 export const deleteObject = () =>{
   if(currentSelection !==  null){
     scene.remove(scene.children.find((value) => value.uuid === currentSelection.id));
-    scene.remove(currentObject.transformControls);
+    scene.remove(currentSelection.object.transformControls);
     objectList.delete(currentSelection.id);
-    console.log(currentObject);
+    console.log(currentSelection.object);
     
-    currentObject = null;
+    currentSelection.object = null;
     currentSelection = null;
 
   }
@@ -262,16 +316,20 @@ export const deleteObject = () =>{
 
 export function animate(){
 
-
-
-  if(currentObject !== null){ 
-    currentObject.translateObject(currentObject.options.position.x,
-      currentObject.options.position.y,
-      currentObject.options.position.z);
-    currentObject.rotateObject(currentObject.options.rotation.x * Math.PI/180,
-      currentObject.options.rotation.y * Math.PI/180 , currentObject.options.rotation.z * Math.PI/180);  
-    currentObject.scaleObject(currentObject.options.scale.x,
-      currentObject.options.scale.y, currentObject.options.scale.z);
+  if(currentSelection !== null){ 
+    currentSelection.object.translateObject(currentSelection.object.options.position.x,
+      currentSelection.object.options.position.y,
+      currentSelection.object.options.position.z);
+    currentSelection.object.rotateObject(currentSelection.object.options.rotation.x * Math.PI/180,
+      currentSelection.object.options.rotation.y * Math.PI/180 , currentSelection.object.options.rotation.z * Math.PI/180);  
+    currentSelection.object.scaleObject(currentSelection.object.options.scale.x,
+      currentSelection.object.options.scale.y, currentSelection.object.options.scale.z);
+    var j;
+    currentSelection.object.mesh.children.forEach((child) => {
+      if(child.type === "Mesh"){
+        
+      }
+    })
   }
 
   
@@ -280,7 +338,10 @@ export function animate(){
   var intersects = raycaster.intersectObjects(scene.children);
 
   if ( intersects.length > 0  && intersects[ 0 ].object.name !== PLANE) {
-  if ( INTERSECTED !== intersects[ 0 ].object )  INTERSECTED = intersects[ 0 ].object;
+    if ( INTERSECTED !== intersects[ 0 ].object ) { 
+      INTERSECTED = intersects[ 0 ].object;
+      console.log(INTERSECTED);
+    }
   } else {
 
     INTERSECTED = null;
