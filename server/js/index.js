@@ -433,31 +433,60 @@ export function animate(){
 
 }
 
-window.openFile = () => {
-  console.log(scene);
+
+document.getElementById('input-file').addEventListener('change', getFile);
+
+function getFile(event) {
+  event.preventDefault();
+  const input = event.target;
+  if( input.files !== null && input.files.length > 0){
+    const reader = new FileReader();
+    reader.readAsText(input.files[0]);
+    console.log(reader.result);
+
+    var test = document.querySelector('input');
+    var name = test.value.split("\\");
+    document.getElementById('file-name').innerHTML = "[ " + name[2] + " ]";
+    
+    var object = JSON.parse(reader.result);
+
+    var fileBuff =  "../assets/Files/Scene.json";
+    var str = JSON.stringify(object);
+
+    const request = new XMLHttpRequest();
+    const url = "http://localhost:3000/scene";
+    request.open("GET", url);
+    request.send();
+
+    request.onreadystatechange = (e) => {
+      console.log(request.responseText);
+    }
+
+    post(reader.result, url);
+
+  }
 }
 
-var start = false;
 
+function post(str, url) {
+  $.ajax
+  ({
+      type: "POST",
+      //the url where you want to sent the userName and password to
+      url,
+      dataType: 'json',
+      async: false,
+      //json object to sent to the authentication url
+      data:  str,
+      success: function () {
 
-window.start = () => {
-  start = true;
-}
-
-window.pause = () => {
-  start = false;
-  console.log(timeliner);
+      alert("Thanks!"); 
+      }
+  })
 }
 
 
 function render() {
-
-  // if(chain!==null && !chain.openChain && start){
-  //   chain.movingTarget.position.x += 0.1;
-  //   chain.movingTarget.position.z += 0.1;
-  //   //chain.pivot.rotation.z += 0.01;
-    
-  // }
 
   if(chain!==null){
     chain.ik.solve();

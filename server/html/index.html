@@ -7,6 +7,8 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="http://localhost:3000/styles/style.css"  type="text/css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
 <body class="body">
     <section class="heady">
@@ -30,7 +32,8 @@
                 <button class="dropbtn" >File</button>
                 <div class="dropdown-content">
                 <a href="#">New</a>
-                <a onclick="openFile()">Open</a>
+                <label for="input-file-label">Open</label>
+                <input id="input-file" type='file'></input> 
                 <a href="#">Save</a>
                 <a href="#">Save As</a>
                 <a href="#">Exit</a>
@@ -82,18 +85,18 @@
             <button class="principal" onclick="addObject('cone')">
                 <img src="http://localhost:3000/icons/geometrico.png" alt="Cube"><p class="help">Add Cone</p>
             </button>
-            <button class="principal" onclick="addObject('initial_bone')">
+            <button class="principal" onclick="">
                 <img src="http://localhost:3000/icons/bone.png" alt="Cube"><p class="help">Set Initial Bone</p>
             </button>
-            <button class="principal" onclick="addObject('bone')">
+            <button class="principal" onclick="">
                 <img src="http://localhost:3000/icons/joint.png" alt="Cube"><p class="help">Add Bone</p>
             </button>
-            <button class="principal" onclick="addObject('final_bone')">
+            <button class="principal" onclick="">
                 <img src="http://localhost:3000/icons/bone2.png" alt="Cube"><p class="help">Set Final Bone</p>
             </button>
-            <!-- <button class="principal" onclick="setTarget()">
+            <button class="principal" onclick="">
                 <img src="http://localhost:3000/icons/target.png" alt="Cube"><p class="help">Add Target</p>
-            </button> -->
+            </button>
             <button class="principal" id="select-btn" onclick="setParent()" style="display: none; height: 40px;align-self: center;">
                 <img src="http://localhost:3000/icons/enlace.png" alt="Unir" style="width: 24px;height: 24px;align-self: center;justify-self: center;margin-left: 8px;"> <p class="help">Set Children</p>
             </button>
@@ -140,9 +143,9 @@
         </div>
     </section>
     <section class="footy">
-        <h3>[ Nombre del Archivo ]</h3>
+        <h3 id="file-name">[ Nombre del Archivo ]</h3>
         <h3 id="object-name">[ Nombre del Objeto ]</h3>
-    </section>
+    </section> 
     <script src="http://localhost:3000/static/addons/jsm/libs/timeliner_gui.min.js" ></script>
     <script type="module" src="http://localhost:3000/static/utils/constants.js"></script>
     <script type="module" src="http://localhost:3000/static/index.js"></script>
