@@ -10,15 +10,14 @@ class Chain {
         this.name = name;
         this.ik = new IK();
         this.chain = new IKChain();
-        this.constraints = [new IKBallConstraint(120)];
+        this.constraints = [new IKBallConstraint(180)];
         
         this.bones = [];
         this.currentBone = 2;
 
-        this.movingTarget = new THREE.Mesh(new THREE.SphereGeometry(1), new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })) ;
-        this.movingTarget.position.y = 50;
+       
         this.pivot = new THREE.Object3D();
-        this.pivot.add(this.movingTarget);
+        this.pivot.name="pivot";
         var bone = new THREE.Bone();
         bone.name=`bone ${this.currentBone}`;
         bone.position.y = 0;
@@ -37,6 +36,7 @@ class Chain {
         this.helper = new IKHelper(this.ik, {boneSize: 1, wireframe:false});
         this.helper.wireframe = false;
         this.openChain = true;
+        this.movingTarget = null;
     }
 
 
@@ -56,13 +56,15 @@ class Chain {
     }
 
     //@param{THREE.Bone} bone 
-    addFinalBone(bone){
-        bone.position.y = this.boneSize;
-        if (this.bones[this.currentBone - 1]) { this.bones[this.currentBone - 1].add(bone); }
-        this.bones.push(bone);
-        this.chain.add(new IKJoint(bone, {constraints:this.constraints}), {target: this.movingTarget});
-        this.currentBone++;
-        this.openChain = false;
+    addFinalBone(bone, target){
+      this.movingTarget = target;
+      this.pivot.add(target);
+      bone.position.y = this.boneSize;
+      if (this.bones[this.currentBone - 1]) { this.bones[this.currentBone - 1].add(bone); }
+      this.bones.push(bone);
+      this.chain.add(new IKJoint(bone, {constraints:this.constraints}), {target});
+      this.currentBone++;
+      this.openChain = false;
     }
 
 

@@ -1,5 +1,6 @@
 import * as THREE from './build/three.module.js';
 import {OrbitControls} from './addons/jsm/controls/OrbitControls.js';
+import {TransformControls} from './addons/jsm/controls/TransformControls.js';
 import { 
   getRenderer,
   onWindowResize, 
@@ -31,6 +32,7 @@ import Chain from './Components/Chain.js';
 import threeDGeometry from './Components/3DGeometry.js';
 import camera from './utils/camera.js';
 import * as dat from  './addons/jsm/libs/dat.gui.module.js';
+import {TimelinerController} from './addons/jsm/animation/TimelinerController.js';
 //variables
 
 export var renderer, controls, _settingParent = false;
@@ -41,15 +43,16 @@ var currentChildrenOptions = [];
 var scene;
 var raycaster = new THREE.Raycaster();
 var objectList = new Map();
+var timeliner = null;
 export var INTERSECTED, INTERSECTED_BONE;
 export var CURRENT_CAMERA;
 var i;
 var chain = null;
 
 const initialSizes = 10;
-var params = {
-  textField: 'some text'
-}
+const movingTarget = new THREE.Mesh(new THREE.SphereGeometry(1), new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })) ;
+var targetControls = null;
+ 
 
 
 init();
@@ -108,9 +111,9 @@ function init(){
   world.name="WORLD";
   scene.add(world);
 
-  //IK programming =>
 
-  
+  targetControls = new TransformControls(camera[CURRENT_CAMERA] , renderer.domElement);
+  targetControls.addEventListener('change', render);
 
 }
 
@@ -307,20 +310,39 @@ window.addObject = (object) => {
       geometry = new THREE.ConeGeometry(initialSizes, initialSizes * 2, 64);
     break;
     case "initial_bone":
-      console.log("initial_bone");
-      chain = new Chain("chain1", 10);
+      chain = new Chain("chain1", 4);
       isBone = true;
       scene.add(chain.pivot);
-      //TODO: Create chain, create constraints create 1 bone
+      targetControls.attach(chain.pivot);
+      scene.add(targetControls);
     break;
     case "bone":
       chain.addBone(new THREE.Bone());
       isBone = true;
-      //TODO: create bone and add to chain
     break;
     case "final_bone":
-      chain.addFinalBone(new THREE.Bone())
+      chain.addFinalBone(new THREE.Bone(), movingTarget)
       isBone = true;
+      console.log(scene);
+      var trackInfo = [
+					{
+						type: THREE.VectorKeyframeTrack,
+						propertyPath: 'pivot.position',
+						initialValue: [ 0, 0, 0 ],
+						interpolation: THREE.InterpolateSmooth
+					},
+
+					{
+						type: THREE.QuaternionKeyframeTrack,
+						propertyPath: 'pivot.quaternion',
+						initialValue: [ 0, 0, 0, 1 ],
+						interpolation: THREE.InterpolateLinear
+
+					}
+				];
+
+      timeliner = new Timeliner( new TimelinerController( scene, trackInfo, render ) );
+    
     break;
 
   }
@@ -393,8 +415,7 @@ export function animate(){
   if ( intersects.length > 0  && intersects[ 0 ].object.name !== PLANE) {
     if ( INTERSECTED !== intersects[ 0 ].object ) { 
       INTERSECTED = intersects[ 0 ].object;
-      console.log(INTERSECTED);
-      }
+    }
   } else {
 
     INTERSECTED = null;
@@ -416,13 +437,29 @@ window.openFile = () => {
   console.log(scene);
 }
 
+var start = false;
+
+
+window.start = () => {
+  start = true;
+}
+
+window.pause = () => {
+  start = false;
+  console.log(timeliner);
+}
+
 
 function render() {
 
-  if(chain!==null && !chain.openChain){
-    chain.pivot.rotation.x += 0.01;
-    chain.pivot.rotation.y += 0.01;
-    chain.pivot.rotation.z += 0.01;
+  // if(chain!==null && !chain.openChain && start){
+  //   chain.movingTarget.position.x += 0.1;
+  //   chain.movingTarget.position.z += 0.1;
+  //   //chain.pivot.rotation.z += 0.01;
+    
+  // }
+
+  if(chain!==null){
     chain.ik.solve();
   }
 
