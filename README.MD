@@ -1,14 +1,16 @@
-THREEPHICS
+THREEGRAPHS
 
-THREEPHICS is a graphic engine
+THREEGRAPHS is a graphic engine based on javascript
 
-you should download from threejs.org the engine to get in work
+For this is required to have NODE JS installed
 
-After downloaded Create a folder in route server/js called addons
+then you should change directory to server folder and write npm install, to install all required modules
 
-inside of this folder you should paste the folder \three.js-master\examples\jsm
+After this you should write npm start to work.
 
-thats all for the three js working part.
+In your favorite browser write for http://locahost:3000/app to see result. 
+
+Enjoy it!
 
 
 Good Luck
