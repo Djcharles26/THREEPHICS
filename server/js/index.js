@@ -1,5 +1,4 @@
 import * as THREE from './build/three.module.js';
-import {IK, IKChain, IKBallConstraint, IKJoint, IKHelper} from './build/three-ik.module.js';
 import {OrbitControls} from './addons/jsm/controls/OrbitControls.js';
 import { 
   getRenderer,
@@ -28,6 +27,7 @@ import {
   BACK, 
   PERSPECTIVE
 } from './utils/constants.js';
+import Chain from './Components/Chain.js';
 import threeDGeometry from './Components/3DGeometry.js';
 import camera from './utils/camera.js';
 import * as dat from  './addons/jsm/libs/dat.gui.module.js';
@@ -44,6 +44,8 @@ var objectList = new Map();
 export var INTERSECTED, INTERSECTED_BONE;
 export var CURRENT_CAMERA;
 var i;
+var chain = null;
+
 const initialSizes = 10;
 var params = {
   textField: 'some text'
@@ -107,7 +109,6 @@ function init(){
   scene.add(world);
 
   //IK programming =>
-
 
   
 
@@ -257,7 +258,7 @@ export const unselect = () => {
     document.getElementById('object-name').innerHTML = '[  ]';
     document.getElementById("select-btn").style.display = 'flex';
     document.getElementById("unselect-btn").style.display = 'flex';
-    var object = objectList.get(currentSelection.id)
+
     currentSelection.object.material.emissive.setHex(currentSelection.Hex);
     currentSelection.object.mesh.children.forEach((child) => {
       if(child.type === "Mesh"){
@@ -273,10 +274,8 @@ export const unselect = () => {
 const setParent = () => {
   if(currentSelection !== null){
     _settingParent = true;
-    console.log("Ready to associate");
   }else{
     _settingParent  = false;
-    console.log("First select an object")
   }
 }
 
@@ -293,7 +292,7 @@ export const associate = (id) => {
 }
 
 window.addObject = (object) => {
-  let geometry;
+  let geometry, isBone = false;
   switch(object){
     case "cube":  
       geometry = new THREE.BoxGeometry(initialSizes, initialSizes, initialSizes) ;
@@ -305,16 +304,44 @@ window.addObject = (object) => {
       geometry = new THREE.TorusGeometry(initialSizes, initialSizes / 3, initialSizes, initialSizes * initialSizes)
     break;
     case "cone":
-      geometry = new THREE.ConeGeometry(initialSizes, initialSizes * 2, initialSizes);
+      geometry = new THREE.ConeGeometry(initialSizes, initialSizes * 2, 64);
     break;
+    case "initial_bone":
+      console.log("initial_bone");
+      chain = new Chain("chain1", 10);
+      isBone = true;
+      scene.add(chain.pivot);
+      //TODO: Create chain, create constraints create 1 bone
+    break;
+    case "bone":
+      chain.addBone(new THREE.Bone());
+      isBone = true;
+      //TODO: create bone and add to chain
+    break;
+    case "final_bone":
+      chain.addFinalBone(new THREE.Bone())
+      isBone = true;
+    break;
+
   }
-  var object = new threeDGeometry(`${object}-${i}`, geometry, null, false, camera[CURRENT_CAMERA], renderer.domElement);
-  document.getElementById('object-name').innerHTML = '[  '+object.name+'  ]';
-  objectList.set(object.id, object);
-  i++;
-  scene.add(object.mesh);
+  if(!isBone){
+    var object = new threeDGeometry(`${object}-${i}`, geometry, null, false, camera[CURRENT_CAMERA], renderer.domElement);
+    document.getElementById('object-name').innerHTML = '[  '+object.name+'  ]';
+    objectList.set(object.id, object);
+    i++;
+    scene.add(object.mesh);
+  }else{
+
+    isBone = false;
+    scene.add(chain.ik.getRootBone());  
+    scene.add(chain.helper);
+    
+  }
+  
 
 }
+
+
 
 
 export const deleteObject = () =>{
@@ -322,65 +349,22 @@ export const deleteObject = () =>{
     document.getElementById("select-btn").style.display = 'flex';
     document.getElementById("unselect-btn").style.display = 'flex';
     scene.remove(scene.children.find((value) => value.uuid === currentSelection.id));
-    scene.remove(currentSelection.object.transformControls);
     objectList.delete(currentSelection.id);
     console.log(currentSelection.object);
     document.getElementById('object-name').innerHTML = '[  ]';
-    currentSelection.object = null;
-    currentSelection = null;
-
+    unselect();
+    
   }
 
 }
 
-const ik = new IK();
 
-const chain = new IKChain();
-const constraints = [new IKBallConstraint(270)];
-const bones = [];
 
-// Create a target that the IK's effector will reach
-// for.
-const movingTarget = new THREE.Mesh(new THREE.SphereGeometry(10), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
-movingTarget.position.z = 70 ;
-const pivot = new THREE.Object3D();
-pivot.add(movingTarget);
-scene.add(pivot);
-
-// Create a chain of THREE.Bone's, each wrapped as an IKJoint
-// and added to the IKChain
-for (let i = 0; i < 5; i++) {
-  const bone = new THREE.Bone();
-  bone.position.y = i === 0 ? 0 : 50;
-
-  if (bones[i - 1]) { bones[i - 1].add(bone); }
-  bones.push(bone);
-
-  // The last IKJoint must be added with a `target` as an end effector.
-  const target = i === 4 ? movingTarget : null;
-  chain.add(new IKJoint(bone, { constraints }), {  });
-  
-}
-// Add the chain to the IK system
-ik.add(chain);
-
-// Ensure the root bone is added somewhere in the scene
-scene.add(ik.getRootBone());
-
-console.log(ik);
-// Create a helper and add to the scene so we can visualize
-// the bones
-const helper = new IKHelper(ik, {
-  boneSize: 1,
-  wireframe: false
-});
-helper.showAxes = false;
-scene.add(helper);
 
 export function animate(){
 
 
-  ik.solve();
+  // ik.solve();
 
   if(currentSelection !== null){ 
     currentSelection.object.translateObject(currentSelection.object.options.position.x,
@@ -409,6 +393,7 @@ export function animate(){
   if ( intersects.length > 0  && intersects[ 0 ].object.name !== PLANE) {
     if ( INTERSECTED !== intersects[ 0 ].object ) { 
       INTERSECTED = intersects[ 0 ].object;
+      console.log(INTERSECTED);
       }
   } else {
 
@@ -427,12 +412,19 @@ export function animate(){
 
 }
 
+window.openFile = () => {
+  console.log(scene);
+}
+
 
 function render() {
 
-  pivot.rotation.x += 0.01;
-  pivot.rotation.y += 0.01;
-  pivot.rotation.z += 0.01;
+  if(chain!==null && !chain.openChain){
+    chain.pivot.rotation.x += 0.01;
+    chain.pivot.rotation.y += 0.01;
+    chain.pivot.rotation.z += 0.01;
+    chain.ik.solve();
+  }
 
   renderer.render( scene, camera[CURRENT_CAMERA] );
   

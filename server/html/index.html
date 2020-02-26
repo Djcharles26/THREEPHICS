@@ -13,6 +13,7 @@
         <div class="Logo">
             <span class="glyphicon glyphicon-fire" style="line-height: 0; align-self: center; font-size: 25px; margin-right: 10px;"></span>
             <h1 style="font-size: 23px;"> Threegraph</h1> 
+            
         </div>
         <div class="windowBtn">
             <div>
@@ -26,80 +27,100 @@
     <section class="content">
         <div id="toolbar">
             <div class="dropdown">
-                <button class="dropbtn" >Archivo</button>
+                <button class="dropbtn" >File</button>
                 <div class="dropdown-content">
-                <a href="#">Opcion1</a>
-                <a href="#">Opcion2</a>
-                <a href="#">Opcion3</a>
+                <a href="#">New</a>
+                <a onclick="openFile()">Open</a>
+                <a href="#">Save</a>
+                <a href="#">Save As</a>
+                <a href="#">Exit</a>
                 </div>
             </div>
             <div class="dropdown">
-                <button class="dropbtn" >Edición</button>
+                <button class="dropbtn" >Edition</button>
                 <div class="dropdown-content">
-                <a href="#">Opcion1</a>
-                <a href="#">Opcion2</a>
-                <a href="#">Opcion3</a>
+                <a href="#">Copy</a>
+                <a href="#">Paste</a>
+                <a href="#">Delete</a>
+                <a href="#">Undo</a>
+                <a href="#">Redo</a>
                 </div>
             </div>
             <div class="dropdown">
-                <button class="dropbtn" >Vistas</button>
+                <button class="dropbtn" >View</button>
                 <div class="dropdown-content">
-                <a href="#">Opcion1</a>
-                <a href="#">Opcion2</a>
-                <a href="#">Opcion3</a>
+                <a onclick="changeCamera(TOP)">Top</a>
+                <a onclick="changeCamera(LEFT)">Left</a>
+                <a onclick="changeCamera(BOTTOM)">Down</a>
+                <a onclick="changeCamera(RIGHT)">Right</a>
+                <a onclick="changeCamera(FRONT)">Front</a>
+                <a onclick="changeCamera(BACK)">Back</a>
+                <a onclick="changeCamera(PERSPECTIVE)">Perspective</a>
                 </div>
             </div>
             <div class="dropdown">
-                <button class="dropbtn" >Animar</button>
+                <button class="dropbtn" >Animation</button>
                 <div class="dropdown-content">
-                <a href="#">Opcion1</a>
-                <a href="#">Opcion2</a>
-                <a href="#">Opcion3</a>
+                <a href="#">Start</a>
+                <a href="#">Pause</a>
+                <a href="#">Record</a>
                 </div>
             </div>
         </div>
         <div id="botonsitos">
-            <button onclick="addObject('cube')">
+
+            <button class="principal"  onclick="addObject('cube')">
                 <img src="http://localhost:3000/icons/3d.png" alt="Cube">
+                <p class="help">Add Cube</p>
             </button>
-            <button onclick="addObject('toroid')">
-                <img src="http://localhost:3000/icons/donut(1).png" alt="Cube">
+            <button class="principal" onclick="addObject('toroid')">
+                <img src="http://localhost:3000/icons/donut(1).png" alt="Cube"><p class="help">Add Toroid</p>
             </button>
-            <button onclick="addObject('sphere')">
-                <img src="http://localhost:3000/icons/sphere.png" alt="Cube">
+            <button  class="principal" onclick="addObject('sphere')">
+                <img src="http://localhost:3000/icons/sphere.png" alt="Cube"><p class="help">Add Sphere</p>
             </button>
-            <button onclick="addObject('cone')">
-                <img src="http://localhost:3000/icons/geometrico.png" alt="Cube">
+            <button class="principal" onclick="addObject('cone')">
+                <img src="http://localhost:3000/icons/geometrico.png" alt="Cube"><p class="help">Add Cone</p>
             </button>
-            <button onclick="">
-                <img src="http://localhost:3000/icons/bone.png" alt="Cube">
+            <button class="principal" onclick="addObject('initial_bone')">
+                <img src="http://localhost:3000/icons/bone.png" alt="Cube"><p class="help">Set Initial Bone</p>
             </button>
-            <button id="select-btn" onclick="setParent()" style="display: none; height: 40px;align-self: center;">
-                <img src="http://localhost:3000/icons/enlace.png" alt="Unir" style="width: 24px;height: 24px;align-self: center;justify-self: center;margin-left: 8px;">
+            <button class="principal" onclick="addObject('bone')">
+                <img src="http://localhost:3000/icons/joint.png" alt="Cube"><p class="help">Add Bone</p>
             </button>
-            <button id="unselect-btn" onclick="" style="display: none; height: 40px;align-self: center;">
-                <img src="http://localhost:3000/icons/cadena.png" alt="Unir" style="width: 24px;height: 24px;align-self: center;justify-self: center;margin-left: 8px;">
+            <button class="principal" onclick="addObject('final_bone')">
+                <img src="http://localhost:3000/icons/bone2.png" alt="Cube"><p class="help">Set Final Bone</p>
+            </button>
+            <!-- <button class="principal" onclick="setTarget()">
+                <img src="http://localhost:3000/icons/target.png" alt="Cube"><p class="help">Add Target</p>
+            </button> -->
+            <button class="principal" id="select-btn" onclick="setParent()" style="display: none; height: 40px;align-self: center;">
+                <img src="http://localhost:3000/icons/enlace.png" alt="Unir" style="width: 24px;height: 24px;align-self: center;justify-self: center;margin-left: 8px;"> <p class="help">Set Children</p>
+            </button>
+            <button class="principal" id="unselect-btn" onclick="" style="display: none; height: 40px;align-self: center;">
+                <img src="http://localhost:3000/icons/cadena.png" alt="Unir" style="width: 24px;height: 24px;align-self: center;justify-self: center;margin-left: 8px;"> <p class="help">Unset Children</p>
             </button>
         </div>
         <div id="panel">
             <div id="botonsitos_vertical">
-                <div onclick="changeCamera(TOP)">
+                <div class="principal" onclick="changeCamera(TOP)">
                     <span class="glyphicon glyphicon-menu-up" style=" align-items: center; font-size: 20px; margin: 10px;"></span> 
+                    <p class="help">Change Camera to Top</p>
                 </div>
-                <div onclick="changeCamera(BOTTOM)">
-                    <span class="glyphicon glyphicon-menu-down" style=" align-items: center; font-size: 20px; margin: 10px;"></span> 
+                <div class="principal" onclick="changeCamera(BOTTOM)">
+                    <span class="glyphicon glyphicon-menu-down" style=" align-items: center; font-size: 20px; margin: 10px;"></span><p class="help">Change Camera to Bottom</p> 
                 </div>
-                <div onclick="changeCamera(LEFT)">
-                    <span class="glyphicon glyphicon-menu-left" style=" align-items: center; font-size: 20px; margin: 10px;"></span> 
+                <div class="principal" onclick="changeCamera(LEFT)">
+                    <span class="glyphicon glyphicon-menu-left" style=" align-items: center; font-size: 20px; margin: 10px;"></span><p class="help">Change Camera to Left</p> 
                 </div>
-                <div onclick="changeCamera(RIGHT)">
-                    <span class="glyphicon glyphicon-menu-right" style=" align-items: center; font-size: 20px; margin: 10px;"></span> 
+                <div class="principal" onclick="changeCamera(RIGHT)">
+                    <span class="glyphicon glyphicon-menu-right" style=" align-items: center; font-size: 20px; margin: 10px;"></span> <p class="help">Change Camera to Right</p>
                 </div>
-                <div onclick="changeCamera(FRONT)">
-                    <span class="glyphicon glyphicon-stop" style=" align-items: center; font-size: 20px; margin: 10px;"></span> 
+                <div class="principal" onclick="changeCamera(FRONT)">
+                    <span class="glyphicon glyphicon-stop" style=" align-items: center; font-size: 20px; margin: 10px;"></span> <p class="help">Change Camera to Front</p>
                 </div>
-                <div onclick="changeCamera(PERSPECTIVE)">
-                    <span class="glyphicon glyphicon-screenshot" style=" align-items: center; font-size: 20px; margin: 10px;"></span> 
+                <div class="principal" onclick="changeCamera(PERSPECTIVE)">
+                    <span class="glyphicon glyphicon-screenshot" style=" align-items: center; font-size: 20px; margin: 10px;"></span><p class="help">Change Camera to Perspective</p> 
                 </div>
                 
             </div>  

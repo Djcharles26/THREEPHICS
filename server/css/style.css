@@ -232,6 +232,26 @@ flex-direction: column;
 }
 
 
+.help{
+    visibility: hidden;
+    width: 80px;
+    background-color: #f1f1f1;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+
+    color: rgb(136, 135, 135);
+    border: 1px solid #41505c;
+}
+
+.principal:hover .help{
+    transition-delay: .5s;
+    visibility: visible;
+}
 
 
 
