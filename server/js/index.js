@@ -310,6 +310,7 @@ window.addObject = (object) => {
       geometry = new THREE.ConeGeometry(initialSizes, initialSizes * 2, 64);
     break;
     case "initial_bone":
+      console.log("bone");
       chain = new Chain("chain1", 4);
       isBone = true;
       scene.add(chain.pivot);
